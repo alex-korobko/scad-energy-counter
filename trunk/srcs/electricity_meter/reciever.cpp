@@ -450,9 +450,10 @@ try
 bool ReceivePower (const std::vector<byte>& BufPacket)
 {
 const std::string FuncName = "ReceivePower"; 
-uint32_t nByte = BufPacket.size(), BS,abonent,power,e1,e2,e3;
+const uint PacketLength = 105;
+uint32_t nByte = BufPacket.size(), BS,abonent,power;
 uint8_t StatusPotreb, StatusPodkl, StatusRele;
-uint Summary;
+uint currPowerIndex;
 
 my_sql_writer* mysql_wrtr = NULL;
 std::ostringstream strSQL;
@@ -477,38 +478,6 @@ configurator&  conf =  configurator::Instance();
 	logger::Instance().LogMessage(INFO, strMess.str());			
 }
 
-if (nByte < 21) //19 data bytes + crc16
-{
-   std::ostringstream strErr;
-   strErr<< FuncName.c_str()<<" ("<< pthread_self()<<") BufPacket size must be ==21 but "<< nByte;
-   throw exception(strErr.str(), ERROR );	
-};
-
-BS =   (BufPacket[3]<<8) | BufPacket[4];
-abonent  = (BS << 16) | ((BufPacket[5] & 0x03)<<8) | (BufPacket[6]);
-
-StatusPotreb =  (BufPacket[5] & 0x60) >> 5;
-StatusPodkl =  (BufPacket[5] & 0x18) >> 3;
-StatusRele = (BufPacket[5] & 0x80) >> 7;
-
-power 	= (BufPacket[7]<<16) |
-					 (BufPacket[8]<<8) |
-					 (BufPacket[9]);
-
-e1 		= (BufPacket[10]<<16) |
-					 (BufPacket[11]<<8) |
-					 (BufPacket[12]);
-
-e2		=	(BufPacket[13]<<16) |
-					 (BufPacket[14]<<8) |
-					 (BufPacket[15]);
-
-e3		=  (BufPacket[16]<<16) |
-					 (BufPacket[17]<<8) |
-					 (BufPacket[18]);
-					 
-Summary = e1 + e2 + e3;
-
 try
   {
 	mysql_writer_factory& mysql_fact = mysql_writer_factory::Instance();
@@ -521,13 +490,35 @@ try
 	throw exception(strErr.str(), ERROR );			
 };
 
-try
+if (nByte < PacketLength)
+{
+   std::ostringstream strErr;
+   strErr<< FuncName.c_str()<<" ("<< pthread_self()<<") BufPacket size must be =="<<PacketLength<<" but "<< nByte;
+   throw exception(strErr.str(), ERROR );	
+};
+
+BS =   (BufPacket[3]<<8) | BufPacket[4];
+abonent  = (BS << 16) | ((BufPacket[5] & 0x03)<<8) | (BufPacket[6]);
+
+StatusPotreb =  (BufPacket[5] & 0x60) >> 5;
+StatusPodkl =  (BufPacket[5] & 0x18) >> 3;
+StatusRele = (BufPacket[5] & 0x80) >> 7;
+
+currPowerIndex = 7;
+
+while (currPowerIndex <= BufPacket - 4)  // 4 = 2 byte length for power + 2 byte for CRC 
+{
+  power 	= (BufPacket[currPowerIndex]<<8) |
+			  (BufPacket[currPowerIndex+1]);
+
+
+  try
   {
 	strSQL.str("");
 	strSQL.clear();
-	strSQL<<"insert into power (BS, Users, StatusPotreb, StatusPodkl, StatusRele, Power, E1, E2, E3, Summary) values ("<<
+	strSQL<<"insert into power (BS, Users, StatusPotreb, StatusPodkl, StatusRele, Power) values ("<<
 			BS<<","<<abonent<<","<<static_cast<uint32_t>(StatusPotreb) <<","
-			<<static_cast<uint32_t>(StatusPodkl )<<","<<static_cast<uint32_t>(StatusRele)<<","<< power <<","<<e1<<","<<e2<<","<<e3<<","<<Summary<<");";
+			<<static_cast<uint32_t>(StatusPodkl )<<","<<static_cast<uint32_t>(StatusRele)<<","<< power <<");";
 	if (conf.GetLoggingOptions() & SQL_TO_WRITE)
 	  {
 		std::ostringstream strMess;
@@ -552,7 +543,9 @@ try
 	mysql_wrtr->ExecuteSQL("ROLLBACK");
 	logger::Instance().LogMessage(exc);
   };
-
+  
+  currPowerIndex +=2;
+};
 	
 return true;
 
@@ -715,8 +708,8 @@ return true;
 
 bool SendToClientMonitoring(uint16_t ClientInPacket, generic_socket* Socket)
 {
-const uint16_t Length = 16;
-
+const uint16_t Length = 9;
+const string  FunctionName = "SendToClientMonitoring";
 int Abonent, IntervalPoint, CountPoint;
 
 std::vector<byte> RetBuff(Length, static_cast<byte> (0));
@@ -738,12 +731,11 @@ try
 				throw exception(strErr.str(), ERROR );			
 			};
 
-//		mysql_wrtr->ExecuteSQL("BEGIN");
-		mysql_wrtr->ExecuteSQL("select Abonent, IntervalPoint, CountPoint from monitor limit 0,1;"); // TODO - which row is necessary? Does it have only one?
+		mysql_wrtr->ExecuteSQL("select Abonent from monitor limit 0,1;"); // TODO - which row is necessary? Does it have only one?
 		if (mysql_wrtr->NumRows()!= 1)
 		{
 			std::ostringstream strErr;
-			strErr<< "SendToClientMonitoring ("<< pthread_self()<<") query to monitor returned "<< mysql_wrtr->NumRows()<<" rows";
+			strErr<<FunctionName.c_str() << " ("<< pthread_self()<<") query to monitor returned "<< mysql_wrtr->NumRows()<<" rows";
 			throw exception(strErr.str(), ERROR );			
 		};
 		MYSQL_ROW row  = mysql_wrtr->FetchRow();
@@ -751,30 +743,11 @@ try
 		if (row[0] == NULL)
 		{
 			std::ostringstream strErr;
-			strErr<< "SendToClientMonitoring ("<< pthread_self()<<") Abonent value is empty ";
+			strErr<<FunctionName.c_str()<<" ("<< pthread_self()<<") Abonent value is empty ";
 			throw exception(strErr.str(), ERROR );
 		} else {
 			Abonent = atoi (row[0]);
 		};
-
-		if (row[1] == NULL)
-		{
-			std::ostringstream strErr;
-			strErr<< "SendToClientMonitoring ("<< pthread_self()<<") IntervalPoint value is empty ";
-			throw exception(strErr.str(), ERROR );
-		} else {
-			IntervalPoint = atoi (row[1]);
-		};
-
-		if (row[2] == NULL)
-		{
-			std::ostringstream strErr;
-			strErr<< "SendToClientMonitoring ("<< pthread_self()<<") CountPoint value is empty ";
-			throw exception(strErr.str(), ERROR );
-		} else {
-			CountPoint = atoi (row[2]);
-		}
-
 		
 		  RetBuff[0] = 1;
 		  RetBuff[1] = static_cast<uint8_t>(Length>>8);
@@ -784,10 +757,6 @@ try
 		  
 		  RetBuff[5] = static_cast<uint8_t>(Abonent>>8);
 		  RetBuff[6] = static_cast<uint8_t>(Abonent);
-		  RetBuff[7] = static_cast<uint8_t>(IntervalPoint>>8);
-		  RetBuff[8] = static_cast<uint8_t>(IntervalPoint);
-		  RetBuff[9] = static_cast<uint8_t>(CountPoint>>8);
-		  RetBuff[10] = static_cast<uint8_t>(CountPoint);
  		  
 		  uint16_t crc = CRC16(&RetBuff[0],Length-2);
 
@@ -797,7 +766,7 @@ try
 		if (conf.GetLoggingOptions() & NET_PACKETS)
 		{
 			std::ostringstream strMess;
-			strMess << "SendToClientMonitoring ("<< pthread_self()<<") packet ";
+			strMess <<FunctionName.c_str()<<" ("<< pthread_self()<<") packet ";
 			strMess << std::endl;
 			for (std::size_t i=0; i< RetBuff.size(); i++)
 			{
@@ -812,10 +781,8 @@ try
 			logger::Instance().LogMessage(INFO, strMess.str());
 		};
 		Socket->send(RetBuff);
-//		mysql_wrtr->ExecuteSQL("COMMIT");
   } catch (exception exc)
   {
-//	mysql_wrtr->ExecuteSQL("ROLLBACK");
 	logger::Instance().LogMessage(exc);
 	return false;
   };
@@ -1345,7 +1312,8 @@ extern "C" void* socket_thread_function(void* attr)
 			case CODE_RING:
 				SendToClientMonitoring(ClientInHeader,socket);
 
-				while (recieve_data_packet(socket, BufPacket)){
+				if (recieve_data_packet(socket, BufPacket))
+				{
 					ReceivePower(BufPacket);
 				};
 				
@@ -1353,11 +1321,11 @@ extern "C" void* socket_thread_function(void* attr)
 			case CODE_ALARM:
 				//initaly sends nothing back
 
-				if (!recieve_data_packet(socket, BufPacket)){
-					mysql_fact.ReleaseThreadMySQLWriter();
-					return NULL;		
+				if (recieve_data_packet(socket, BufPacket))
+				{
+					ReceiveAlarm(BufPacket);
 				};
-				ReceiveAlarm(BufPacket);
+				
 				break;
 			default:
 				std::ostringstream strError;

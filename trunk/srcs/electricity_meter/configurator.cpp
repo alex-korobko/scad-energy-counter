@@ -13,7 +13,7 @@ namespace electricity_meter
 
 configurator::configurator()
 {
-	mAppVersion = "1.8.0";
+	mAppVersion = "1.9.0";
 	
 };
 
