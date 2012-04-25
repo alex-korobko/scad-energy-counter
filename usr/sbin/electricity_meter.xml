@@ -1,0 +1,22 @@
+<config>
+	<log>
+		<options>
+			<option>all</option>
+			<option>net_packets</option>
+			<option>sql_to_write</option>
+			<option>sql_to_read</option>
+		</options>
+	</log>
+	<db>
+		<user_name>scad-energy</user_name>
+		<password>scad2011</password>
+		<host>localhost</host>
+		<name>electro</name>
+		<port>28</port>
+	</db>
+	<socket>
+		<port>3131</port>
+		<recv_send_timeout_sec>3600</recv_send_timeout_sec>
+		<max_connect_queue>128</max_connect_queue>
+	</socket>
+</config>
