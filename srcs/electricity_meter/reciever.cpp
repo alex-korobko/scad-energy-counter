@@ -506,7 +506,7 @@ StatusRele = (BufPacket[5] & 0x80) >> 7;
 
 currPowerIndex = 7;
 
-while (currPowerIndex <= BufPacket - 4)  // 4 = 2 byte length for power + 2 byte for CRC 
+while (currPowerIndex <= nByte - 4)  // 4 = 2 byte length for power + 2 byte for CRC 
 {
   power 	= (BufPacket[currPowerIndex]<<8) |
 			  (BufPacket[currPowerIndex+1]);
@@ -709,7 +709,7 @@ return true;
 bool SendToClientMonitoring(uint16_t ClientInPacket, generic_socket* Socket)
 {
 const uint16_t Length = 9;
-const string  FunctionName = "SendToClientMonitoring";
+const std::string  FunctionName = "SendToClientMonitoring";
 int Abonent, IntervalPoint, CountPoint;
 
 std::vector<byte> RetBuff(Length, static_cast<byte> (0));
