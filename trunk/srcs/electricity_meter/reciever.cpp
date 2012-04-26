@@ -727,7 +727,7 @@ try
 			} catch (exception exc)
 			{
 				std::ostringstream strErr;
-				strErr<< "SendToClientMonitoring ("<< pthread_self()<<") GetThreadMySQLWriter returned "<< exc.what();
+				strErr<<FunctionName.c_str() << " ("<< pthread_self()<<") GetThreadMySQLWriter returned "<< exc.what();
 				throw exception(strErr.str(), ERROR );			
 			};
 
@@ -794,6 +794,7 @@ bool SendToClientOptions(uint16_t ClientInPacket, generic_socket* Socket)
 {
 const uint16_t Length = 32;
 const uint16_t PhoneNumOffset = 15;
+const std::string  FunctionName = "SendToClientMonitoring";
 
 std::vector<byte> RetBuff(Length, static_cast<byte> (0));
 MYSQL_ROW row;
@@ -812,16 +813,15 @@ try
 			} catch (exception exc)
 			{
 				std::ostringstream strErr;
-				strErr<< "SendToClientOptions ("<< pthread_self()<<") GetThreadMySQLWriter returned "<< exc.what();
+				strErr<<FunctionName.c_str()<< " ("<< pthread_self()<<") GetThreadMySQLWriter returned "<< exc.what();
 				throw exception(strErr.str(), ERROR );			
 			};
 
-//		mysql_wrtr->ExecuteSQL("BEGIN");
 		mysql_wrtr->ExecuteSQL("select FoneServer from monitor limit 0,1;"); // TODO - which row is necessary? Does it have only one?
 		if (mysql_wrtr->NumRows()!= 1)
 		{
 			std::ostringstream strErr;
-			strErr<< "SendToClientOptions ("<< pthread_self()<<") query to monitor returned "<< mysql_wrtr->NumRows()<<" rows";
+			strErr<<FunctionName.c_str()<< " ("<< pthread_self()<<") query to monitor returned "<< mysql_wrtr->NumRows()<<" rows";
 			throw exception(strErr.str(), ERROR );			
 		};
 		MYSQL_ROW row  = mysql_wrtr->FetchRow();
@@ -829,7 +829,7 @@ try
 			(strlen(row[0])==0))
 		{
 			std::ostringstream strErr;
-			strErr<< "SendToClientOptions ("<< pthread_self()<<") FoneServer value is empty ";
+			strErr<<FunctionName.c_str()<< " ("<< pthread_self()<<") FoneServer value is empty ";
 			throw exception(strErr.str(), ERROR );
 		};
 		int PhoneNumLen = strlen(row[0]);
@@ -854,7 +854,7 @@ try
 		  if (localtime_r(&TimeNow, &LocalTime) == NULL)
 			{
 				std::ostringstream strErr;
-				strErr<< "SendToClientOptions ("<< pthread_self()<<") localtime_r returned NULL";
+				strErr<<FunctionName.c_str()<< " ("<< pthread_self()<<") localtime_r returned NULL";
 				throw exception(strErr.str(), ERROR );
 			};
 		  TempTime = (static_cast<uint32_t>(LocalTime.tm_year-100)<<20) + //-100 because tm_year has year as year-1900
@@ -872,7 +872,7 @@ try
 		  if (conf.GetLoggingOptions() & SQL_TO_READ)
 			  {
 				std::ostringstream strMess;
-				strMess<< "SendToClientOptions ("<< pthread_self()<<") sql "
+				strMess<<FunctionName.c_str()<< " ("<< pthread_self()<<") sql "
 						<< strSQL.str();
 				logger::Instance().LogMessage(INFO, strMess.str());			
 			  };
@@ -880,7 +880,7 @@ try
 			if (mysql_wrtr->NumRows()!= 1)
 			{
 				std::ostringstream strErr;
-				strErr<< "SendToClientOptions ("<< pthread_self()<<") query "<< strSQL.str() <<" returned "<< mysql_wrtr->NumRows()<<" rows";
+				strErr<<FunctionName.c_str()<< " ("<< pthread_self()<<") query "<< strSQL.str() <<" returned "<< mysql_wrtr->NumRows()<<" rows";
 				throw exception(strErr.str(), ERROR );
 			};
 
@@ -889,37 +889,37 @@ try
 			if (row[0] ==NULL)
 			{
 				std::ostringstream strErr;
-				strErr<< "SendToClientOptions ("<< pthread_self()<<") query "<< strSQL.str() <<" returned NULL for HalfPic1";
+				strErr<<FunctionName.c_str()<< " ("<< pthread_self()<<") query "<< strSQL.str() <<" returned NULL for HalfPic1";
 				throw exception(strErr.str(), ERROR );
 			};
 			if (row[1] ==NULL)
 			{
 				std::ostringstream strErr;
-				strErr<< "SendToClientOptions ("<< pthread_self()<<") query "<< strSQL.str() <<" returned NULL for Pic1";
+				strErr<<FunctionName.c_str()<< " ("<< pthread_self()<<") query "<< strSQL.str() <<" returned NULL for Pic1";
 				throw exception(strErr.str(), ERROR );
 			};
 			if (row[2] ==NULL)
 			{
 				std::ostringstream strErr;
-				strErr<< "SendToClientOptions ("<< pthread_self()<<") query "<< strSQL.str() <<" returned NULL for HalfPic2";
+				strErr<<FunctionName.c_str()<< " ("<< pthread_self()<<") query "<< strSQL.str() <<" returned NULL for HalfPic2";
 				throw exception(strErr.str(), ERROR );
 			};
 			if (row[3] ==NULL)
 			{
 				std::ostringstream strErr;
-				strErr<< "SendToClientOptions ("<< pthread_self()<<") query "<< strSQL.str() <<" returned NULL for Pic2";
+				strErr<<FunctionName.c_str()<< " ("<< pthread_self()<<") query "<< strSQL.str() <<" returned NULL for Pic2";
 				throw exception(strErr.str(), ERROR );
 			};
 			if (row[4] ==NULL)
 			{
 				std::ostringstream strErr;
-				strErr<< "SendToClientOptions ("<< pthread_self()<<") query "<< strSQL.str() <<" returned NULL for HalfPic3";
+				strErr<<FunctionName.c_str()<< " ("<< pthread_self()<<") query "<< strSQL.str() <<" returned NULL for HalfPic3";
 				throw exception(strErr.str(), ERROR );
 			};
 			if (row[5] ==NULL)
 			{
 				std::ostringstream strErr;
-				strErr<< "SendToClientOptions ("<< pthread_self()<<") query "<< strSQL.str() <<" returned NULL for Night";
+				strErr<<FunctionName.c_str()<< " ("<< pthread_self()<<") query "<< strSQL.str() <<" returned NULL for Night";
 				throw exception(strErr.str(), ERROR );
 			};
 
@@ -935,7 +935,7 @@ try
 		  if (conf.GetLoggingOptions() & SQL_TO_READ)
 			  {
 				std::ostringstream strMess;
-				strMess<< "SendToClientOptions ("<< pthread_self()<<") sql "
+				strMess<<FunctionName.c_str()<< " ("<< pthread_self()<<") sql "
 						<< strSQL.str();
 				logger::Instance().LogMessage(INFO, strMess.str());			
 			  };
@@ -943,7 +943,7 @@ try
 		  if (mysql_wrtr->NumRows()!= 1)
 			{
 				std::ostringstream strErr;
-				strErr<< "SendToClientOptions ("<< pthread_self()<<") query "<< strSQL.str()<<" returned "<< mysql_wrtr->NumRows()<<" rows";
+				strErr<<FunctionName.c_str()<< " ("<< pthread_self()<<") query "<< strSQL.str()<<" returned "<< mysql_wrtr->NumRows()<<" rows";
 				throw exception(strErr.str(), ERROR );
 			};
 
@@ -952,14 +952,14 @@ try
 			if (row[0] ==NULL)
 			{
 				std::ostringstream strErr;
-				strErr<< "SendToClientOptions ("<< pthread_self()<<") query "<< strSQL.str() <<" returned NULL for Disbalans";
+				strErr<<FunctionName.c_str()<< " ("<< pthread_self()<<") query "<< strSQL.str() <<" returned NULL for Disbalans";
 				throw exception(strErr.str(), ERROR );
 			};
 
 			if (row[1] ==NULL)
 			{
 				std::ostringstream strErr;
-				strErr<< "SendToClientOptions ("<< pthread_self()<<") query "<< strSQL.str() <<" returned NULL for TimeBalans";
+				strErr<<FunctionName.c_str()<< " ("<< pthread_self()<<") query "<< strSQL.str() <<" returned NULL for TimeBalans";
 				throw exception(strErr.str(), ERROR );
 			};
 
@@ -974,7 +974,7 @@ try
 		if (conf.GetLoggingOptions() & NET_PACKETS)
 		{
 			std::ostringstream strMess;
-			strMess << "SendToClientOptions ("<< pthread_self()<<") packet ";
+			strMess <<FunctionName.c_str()<< " ("<< pthread_self()<<") packet ";
 			strMess << std::endl;
 			for (std::size_t i=0; i< RetBuff.size(); i++)
 			{
@@ -989,10 +989,8 @@ try
 			logger::Instance().LogMessage(INFO, strMess.str());
 		};
 		Socket->send(RetBuff);
-//		mysql_wrtr->ExecuteSQL("COMMIT");
   } catch (exception exc)
   {
-//	mysql_wrtr->ExecuteSQL("ROLLBACK");
 	logger::Instance().LogMessage(exc);
 	return false;
   };
