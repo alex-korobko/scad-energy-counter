@@ -110,7 +110,6 @@ int main(int argc, char **argv)
 		logg.SetAppVersion(config.GetAppVersion());
 		config.LoadConfiguration(program_name+".xml");
 		
-		
 		electricity_meter::mysql_writer_factory& mysql_fact = electricity_meter::mysql_writer_factory::Instance();
 
 		mysql_fact.Connect(config.GetDBHost(), 
@@ -123,7 +122,7 @@ int main(int argc, char **argv)
 		electricity_meter::logger::Instance().LogMessage(electricity_meter::INFO, "Program started, connection to MySQL done. Ready to recieve data packets.");
 		reciev.StartRecieve(config.GetPortNumber(),
 							config.GetRecvSendTimeoutSec(),
-							config.GetMaxConnectQueue());	
+							config.GetMaxConnectQueue());
 	} 
 	catch (electricity_meter::exception exc) 
 	{
