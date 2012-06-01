@@ -54,7 +54,6 @@ void scheduled_actions::StartActions(vector<scheduled_action> Actions)
 	      return;
          };
 	
-	mStopRecieveFlag = false;
 
     pthread_creating_result=pthread_create(&pthread_id, &attr, socket_thread_function, accepted_socket);
 	if ( pthread_creating_result != ::EOK){
