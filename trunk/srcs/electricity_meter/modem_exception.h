@@ -1,18 +1,18 @@
-#ifndef __COMPORT_EXCEPTION__
-#define __COMPORT_EXCEPTION__
+#ifndef __MODEM_EXCEPTION__
+#define __MODEM_EXCEPTION__
 
 namespace electricity_meter
 {
 
-class comport_exception {
+class modem_exception {
 private:
-    string comport_exc_descr;
+    string modem_exc_descr;
 
 public:
-    explicit comport_exception (string description) : 
-	    comport_exc_descr (description) {};
+    explicit modem_exception (string description) : 
+	    modem_exc_descr (description) {};
 
-    string get_description () {return comport_exc_descr;};
+    string get_description () {return modem_exc_descr;};
 };
 
 }
