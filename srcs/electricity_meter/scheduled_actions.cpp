@@ -11,16 +11,20 @@
 #include <sstream>
 #include <mysql.h>
 #include <errno.h>
+#include <vector>
 
 #include "common_declarations.h"
 #include "exception.h"
 #include "configurator.h"
 #include "logger.h"
+#include "scheduled_action.h"
+#include "scheduled_actions.h"
 
-namespace electricity_meter
-{
+namespace electricity_meter {
 
-scheduled_actions::scheduled_actions(): {}
+extern "C" void* scheduled_actions_thread_function(void* attr);
+	
+scheduled_actions::scheduled_actions() {}
 
 scheduled_actions::~scheduled_actions() {}
 
@@ -37,13 +41,13 @@ scheduled_actions& scheduled_actions::Instance()
 	return shactInst;
 }
 
-void scheduled_actions::StartActions(vector<scheduled_action> Actions)
+void scheduled_actions::StartActions(std::vector<scheduled_action> actions)
 {
 	const std::string function_name = "StartActions";
 	pthread_attr_t      attr;
 	int pthread_creating_result = 0;
 	pthread_t pthread_id;
-
+/*
 	if (pthread_attr_init(&attr)!=::EOK){
           logger::Instance().LogMessage(ERROR, function_name+": Can`t pthread_attr_init(&attr)");
 	      return;
@@ -53,23 +57,23 @@ void scheduled_actions::StartActions(vector<scheduled_action> Actions)
           logger::Instance().LogMessage(ERROR,  function_name+"Can`t pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED)");
 	      return;
          };
-	
 
-    pthread_creating_result=pthread_create(&pthread_id, &attr, socket_thread_function, accepted_socket);
+
+    pthread_creating_result=pthread_create(&pthread_id, &attr, socket_thread_function, (void*)&actions);
 	if ( pthread_creating_result != ::EOK){
 	   std::string message(function_name);
 	   message+="fail to create device thread : ";	   
 	   message+=strerror(pthread_creating_result);
        logger::Instance().LogMessage(ERROR, message);
 	};
-	
+*/	
 }
 
 void scheduled_actions::StopActions()
 {
 }
 	
-extern "C" void* socket_thread_function(void* attr)
+extern "C" void* scheduled_actions_thread_function(void* attr)
 {
 	const uint8_t BeginDataTransferLen = 4;
 }
