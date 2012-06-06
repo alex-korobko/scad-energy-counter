@@ -18,7 +18,7 @@ private:
     float m_comport_koeff;
 public:
 
-    comport::comport (
+    comport (
             int port_number,
             int baud_rate,
 	    byte parity,
@@ -30,20 +30,13 @@ public:
     virtual ~comport() throw (comport_exception);
 
     void send(comport_data_block data_to_send , 
-					bool flush_io_buffers_after_send = false,
-					unsigned int rts_delay = 5000) throw (comport_exception);
+					bool flush_io_buffers_after_send = false) throw (comport_exception);
+
     int recv( comport::comport_data_block &buffer_to_recieve,
                    int bytes_count,
                    bool flush_io_buffers=false,
 				   unsigned int recieve_timeout = 10) throw (comport_exception);
 
-    void set_rts_state (byte rts_state) throw (comport_exception);
-    byte get_rts_state () throw (comport_exception);
-/*
-    void flush_input_buffer() throw (comport_exception);
-    void flush_output_buffer() throw (comport_exception);
-    void flush_input_output_buffer() throw (comport_exception);
-*/	
         enum{ BAUD_9600=9600,
               BAUD_19200=19200,
               BAUD_115200=115200};
