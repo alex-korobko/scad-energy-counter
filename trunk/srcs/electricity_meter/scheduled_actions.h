@@ -9,14 +9,14 @@ class scheduled_actions{
 public:
 	static scheduled_actions& Instance();
 
-	void StartActions(vector<scheduled_action> Actions);
+	void StartActions(std::vector<scheduled_action> actions);
 	void StopActions();
 private:
 	scheduled_actions();
 	~scheduled_actions();
 	scheduled_actions(const scheduled_actions& schact);
 	scheduled_actions& operator=(const scheduled_actions& schact);
-}
+};
 
 }
 #endif

@@ -6,7 +6,7 @@ namespace electricity_meter
 
 class modem {
 private:
-    typedef vector<byte> modem_data_block;
+    typedef vector<modem_character> modem_data_block;
 
     int m_port_handle;
     string m_dev_port;
@@ -14,7 +14,7 @@ private:
     byte m_parity;
     byte m_data_bits;
     byte m_stop_bits;
-    int m_delay_useconds;
+    unsigned int m_delay_useconds;
     float m_modem_koeff;
 public:
 
@@ -24,7 +24,8 @@ public:
 	    byte parity,
 	    byte data_bits,
 	    byte stop_bits,
-	    int delay_useconds=0,
+	    unsigned int delay_useconds=0,
+		unsigned int recieve_timeout_seconds = 1,
         float modem_koeff=1.0)  throw (modem_exception);
 
     virtual ~modem() throw (modem_exception);
@@ -35,9 +36,7 @@ public:
 					bool flush_io_buffers_after_send = false) throw (modem_exception);
 
     int recv( modem::modem_data_block &buffer_to_recieve,
-                   int bytes_count,
-                   bool flush_io_buffers=false,
-				   unsigned int recieve_timeout = 10) throw (modem_exception);
+                   bool flush_io_buffers=false) throw (modem_exception);
 
         enum{ BAUD_9600=B9600,
               BAUD_19200=B19200,

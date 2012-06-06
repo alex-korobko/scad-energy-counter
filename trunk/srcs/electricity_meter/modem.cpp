@@ -38,7 +38,8 @@ modem::modem (
 	    byte parity,
 	    byte data_bits,
 	    byte stop_bits,
-	    int delay_useconds,
+	    unsigned int delay_useconds,
+		unsigned int recieve_timeout_seconds,
         float modem_koeff)  throw (modem_exception)  :
 	    		m_port_handle(-1),
 	    	    m_dev_port("/dev/ttyS"),
@@ -104,10 +105,9 @@ modem::modem (
 
     termios_param.c_lflag &= ~( ECHO|ECHOE|ECHOK|ECHOKE|ECHOCTL|ECHONL|ICANON|ISIG);
 	termios_param.c_cflag |= (CLOCAL | CREAD);
-	termios_param.c_iflag &= ~IMAXBEL;
-	termios_param.c_oflag &= ~ (ONLCR | OPOST);
+	termios_param.c_oflag &= ~ OPOST;
 	termios_param.c_cc[VMIN] = 0;
-	termios_param.c_cc[VTIME] = 10;
+	termios_param.c_cc[VTIME] = recieve_timeout_seconds*10;
 	
 	if (data_bits==DATA_BITS_5) {
 			termios_param.c_cflag |= CS5;
@@ -178,6 +178,27 @@ modem::~modem() throw (modem_exception){
 		}
 };
 
+void modem::init() throw (modem_exception){
+	modem_data_block buffer;
+	std::string modem_answer;
+
+	buffer.push_back('A');
+	buffer.push_back('T');
+	buffer.push_back('\r');
+	
+	this->send(buffer, true);
+	buffer.clear();
+	this->recv(buffer);
+
+	buffer.push_back('\0');
+	modem_answer = &buffer[0];
+	if (modem_answer.compare("OK") != 0) {
+		ostringstream exception_message;
+		exception_message<<"Unrecognized answer from modem on "<<m_dev_port<<" : "<<modem_answer.c_str();
+		throw modem_exception(exception_message.str());		
+	}
+}
+
 void modem::send(modem_data_block data_to_send, 
 								bool flush_io_buffers_after_send) throw (modem_exception){
 	static int  delay_messages_counter = 0;
@@ -193,8 +214,8 @@ void modem::send(modem_data_block data_to_send,
 	};
 
 	count_of_sended_bytes=write(m_port_handle,
-                                                     &data_to_send[0],
-                                                     data_to_send.size());
+								&data_to_send[0],
+                                data_to_send.size());
 
 	if (static_cast<modem_data_block::size_type >(count_of_sended_bytes)!=data_to_send.size()) {
 		exception_message<<"Can`t  write "<<data_to_send.size()<<" bytes to "<<m_dev_port;
@@ -222,11 +243,6 @@ if (delay_messages_counter >64) {
 
 	usleep(echo_interval);
     if (flush_io_buffers_after_send) {
-/*
-	   ostringstream description;
-	   description<<"Flush after send";
-	   program_settings::get_instance()->sys_message(program_settings::INFO_MSG, description.str());
-*/
 	     if (tcflush(m_port_handle, TCIOFLUSH)<0) {
 			exception_message<<"Can`t flush input and output streams "<<strerror(errno);
 			 if (close(m_port_handle)!=0)
@@ -240,15 +256,11 @@ if (delay_messages_counter >64) {
 
 
 int  modem::recv(modem::modem_data_block &buffer_to_recieve,
-                     int bytes_count,
-	                 bool flush_io_buffers,
-				     unsigned int recieve_timeout) 
+	                 bool flush_io_buffers) 
 					 throw (modem_exception)
 {
-    modem_data_block recived_data(bytes_count), all_recieved_data;
-   modem_data_block::iterator iter_on_received_data;
 	ostringstream exception_message;	     
-	int  bytes_read, bytes_read_summary=0;
+	modem_character read_char;
 
 	//impossible
 	if (m_port_handle < 0) {
@@ -271,39 +283,12 @@ int  modem::recv(modem::modem_data_block &buffer_to_recieve,
     };
   }; // if (flush_io_buffers) {
 
-  while(bytes_read_summary<bytes_count) {
-
-    bytes_read = readcond(m_port_handle,
-                            &recived_data[0],
-                            bytes_count,
-                            bytes_count,
-                            0, 
-                            recieve_timeout); //expire if recieve_timeout*1/10 sec
-
-    	if (bytes_read<0) {
- 		exception_message<<"Can`t  read from "<<m_dev_port<<" : "<<strerror(errno);
-		throw modem_exception(exception_message.str());
-    	};
-
-       if (bytes_read==0) {
-			break;
-    	};
-
-
-         bytes_read_summary+=bytes_read;
-         iter_on_received_data=recived_data.begin();
-         advance(iter_on_received_data, bytes_read);
-
-	     buffer_to_recieve.insert(buffer_to_recieve.end(), recived_data.begin() , iter_on_received_data);
+  while(read(m_port_handle, &read_char,1) > 0) {
+		buffer_to_recieve.push_back(read_char);
 		usleep(1000); //sleep for 1mS until new data arrives
     };
 
-     if (bytes_read_summary!=bytes_count) {
- 		exception_message<<"Too little bytes recieved: must be "<<bytes_count<<" but "<<bytes_read_summary;
-		throw modem_exception(exception_message.str());
-     };
-
-    return bytes_read_summary;
+    return buffer_to_recieve.size();
 };    
 
 };
