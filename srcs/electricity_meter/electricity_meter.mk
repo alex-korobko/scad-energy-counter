@@ -7,14 +7,14 @@ ProjectName            :=electricity_meter
 ConfigurationName      :=Debug
 IntermediateDirectory  :=./Debug
 OutDir                 := $(IntermediateDirectory)
-WorkspacePath          := "/home/scad-energy/.codelite/Server"
-ProjectPath            := "/home/scad-energy/.codelite/Server/electricity_meter"
+WorkspacePath          := "/home/kor/scad-energy-counter/srcs"
+ProjectPath            := "/home/kor/scad-energy-counter/srcs/electricity_meter"
 CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=Alex
-Date                   :=12/02/2011
-CodeLitePath           :="/home/scad-energy/.codelite"
+Date                   :=06/06/2012
+CodeLitePath           :="/home/kor/.codelite"
 LinkerName             :=g++
 ArchiveTool            :=ar rcus
 SharedObjectLinkerName :=g++ -shared -fPIC
@@ -35,7 +35,7 @@ Preprocessors          :=
 ObjectSwitch           :=-o 
 ArchiveOutputSwitch    := 
 PreprocessOnlySwitch   :=-E 
-ObjectsFileList        :="/home/scad-energy/.codelite/Server/electricity_meter/electricity_meter.txt"
+ObjectsFileList        :="/home/kor/scad-energy-counter/srcs/electricity_meter/electricity_meter.txt"
 PCHCompileFlags        :=
 MakeDirCommand         :=mkdir -p
 CmpOptions             := -g $(Preprocessors)
@@ -53,7 +53,7 @@ LibPath                := $(LibraryPathSwitch).
 ##
 CodeLiteDir:=/usr/share/codelite
 Objects=$(IntermediateDirectory)/main$(ObjectSuffix) $(IntermediateDirectory)/reciever$(ObjectSuffix) $(IntermediateDirectory)/configurator$(ObjectSuffix) $(IntermediateDirectory)/packets_processor$(ObjectSuffix) $(IntermediateDirectory)/logger$(ObjectSuffix) $(IntermediateDirectory)/my_sql_writer$(ObjectSuffix) $(IntermediateDirectory)/exception$(ObjectSuffix) $(IntermediateDirectory)/generic_socket$(ObjectSuffix) $(IntermediateDirectory)/server_socket$(ObjectSuffix) $(IntermediateDirectory)/mysql_writer_factory$(ObjectSuffix) \
-	
+	$(IntermediateDirectory)/modem$(ObjectSuffix) $(IntermediateDirectory)/scheduled_actions$(ObjectSuffix) 
 
 ##
 ## Main Build Targets 
@@ -77,84 +77,100 @@ PreBuild:
 ## Objects
 ##
 $(IntermediateDirectory)/main$(ObjectSuffix): main.cpp $(IntermediateDirectory)/main$(DependSuffix)
-	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/scad-energy/.codelite/Server/electricity_meter/main.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/main$(ObjectSuffix) $(IncludePath)
+	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/kor/scad-energy-counter/srcs/electricity_meter/main.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/main$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/main$(DependSuffix): main.cpp
-	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/main$(ObjectSuffix) -MF$(IntermediateDirectory)/main$(DependSuffix) -MM "/home/scad-energy/.codelite/Server/electricity_meter/main.cpp"
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/main$(ObjectSuffix) -MF$(IntermediateDirectory)/main$(DependSuffix) -MM "/home/kor/scad-energy-counter/srcs/electricity_meter/main.cpp"
 
 $(IntermediateDirectory)/main$(PreprocessSuffix): main.cpp
-	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/main$(PreprocessSuffix) "/home/scad-energy/.codelite/Server/electricity_meter/main.cpp"
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/main$(PreprocessSuffix) "/home/kor/scad-energy-counter/srcs/electricity_meter/main.cpp"
 
 $(IntermediateDirectory)/reciever$(ObjectSuffix): reciever.cpp $(IntermediateDirectory)/reciever$(DependSuffix)
-	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/scad-energy/.codelite/Server/electricity_meter/reciever.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/reciever$(ObjectSuffix) $(IncludePath)
+	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/kor/scad-energy-counter/srcs/electricity_meter/reciever.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/reciever$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/reciever$(DependSuffix): reciever.cpp
-	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/reciever$(ObjectSuffix) -MF$(IntermediateDirectory)/reciever$(DependSuffix) -MM "/home/scad-energy/.codelite/Server/electricity_meter/reciever.cpp"
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/reciever$(ObjectSuffix) -MF$(IntermediateDirectory)/reciever$(DependSuffix) -MM "/home/kor/scad-energy-counter/srcs/electricity_meter/reciever.cpp"
 
 $(IntermediateDirectory)/reciever$(PreprocessSuffix): reciever.cpp
-	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/reciever$(PreprocessSuffix) "/home/scad-energy/.codelite/Server/electricity_meter/reciever.cpp"
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/reciever$(PreprocessSuffix) "/home/kor/scad-energy-counter/srcs/electricity_meter/reciever.cpp"
 
 $(IntermediateDirectory)/configurator$(ObjectSuffix): configurator.cpp $(IntermediateDirectory)/configurator$(DependSuffix)
-	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/scad-energy/.codelite/Server/electricity_meter/configurator.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/configurator$(ObjectSuffix) $(IncludePath)
+	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/kor/scad-energy-counter/srcs/electricity_meter/configurator.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/configurator$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/configurator$(DependSuffix): configurator.cpp
-	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/configurator$(ObjectSuffix) -MF$(IntermediateDirectory)/configurator$(DependSuffix) -MM "/home/scad-energy/.codelite/Server/electricity_meter/configurator.cpp"
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/configurator$(ObjectSuffix) -MF$(IntermediateDirectory)/configurator$(DependSuffix) -MM "/home/kor/scad-energy-counter/srcs/electricity_meter/configurator.cpp"
 
 $(IntermediateDirectory)/configurator$(PreprocessSuffix): configurator.cpp
-	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/configurator$(PreprocessSuffix) "/home/scad-energy/.codelite/Server/electricity_meter/configurator.cpp"
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/configurator$(PreprocessSuffix) "/home/kor/scad-energy-counter/srcs/electricity_meter/configurator.cpp"
 
 $(IntermediateDirectory)/packets_processor$(ObjectSuffix): packets_processor.cpp $(IntermediateDirectory)/packets_processor$(DependSuffix)
-	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/scad-energy/.codelite/Server/electricity_meter/packets_processor.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/packets_processor$(ObjectSuffix) $(IncludePath)
+	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/kor/scad-energy-counter/srcs/electricity_meter/packets_processor.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/packets_processor$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/packets_processor$(DependSuffix): packets_processor.cpp
-	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/packets_processor$(ObjectSuffix) -MF$(IntermediateDirectory)/packets_processor$(DependSuffix) -MM "/home/scad-energy/.codelite/Server/electricity_meter/packets_processor.cpp"
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/packets_processor$(ObjectSuffix) -MF$(IntermediateDirectory)/packets_processor$(DependSuffix) -MM "/home/kor/scad-energy-counter/srcs/electricity_meter/packets_processor.cpp"
 
 $(IntermediateDirectory)/packets_processor$(PreprocessSuffix): packets_processor.cpp
-	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/packets_processor$(PreprocessSuffix) "/home/scad-energy/.codelite/Server/electricity_meter/packets_processor.cpp"
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/packets_processor$(PreprocessSuffix) "/home/kor/scad-energy-counter/srcs/electricity_meter/packets_processor.cpp"
 
 $(IntermediateDirectory)/logger$(ObjectSuffix): logger.cpp $(IntermediateDirectory)/logger$(DependSuffix)
-	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/scad-energy/.codelite/Server/electricity_meter/logger.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/logger$(ObjectSuffix) $(IncludePath)
+	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/kor/scad-energy-counter/srcs/electricity_meter/logger.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/logger$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/logger$(DependSuffix): logger.cpp
-	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/logger$(ObjectSuffix) -MF$(IntermediateDirectory)/logger$(DependSuffix) -MM "/home/scad-energy/.codelite/Server/electricity_meter/logger.cpp"
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/logger$(ObjectSuffix) -MF$(IntermediateDirectory)/logger$(DependSuffix) -MM "/home/kor/scad-energy-counter/srcs/electricity_meter/logger.cpp"
 
 $(IntermediateDirectory)/logger$(PreprocessSuffix): logger.cpp
-	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/logger$(PreprocessSuffix) "/home/scad-energy/.codelite/Server/electricity_meter/logger.cpp"
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/logger$(PreprocessSuffix) "/home/kor/scad-energy-counter/srcs/electricity_meter/logger.cpp"
 
 $(IntermediateDirectory)/my_sql_writer$(ObjectSuffix): my_sql_writer.cpp $(IntermediateDirectory)/my_sql_writer$(DependSuffix)
-	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/scad-energy/.codelite/Server/electricity_meter/my_sql_writer.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/my_sql_writer$(ObjectSuffix) $(IncludePath)
+	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/kor/scad-energy-counter/srcs/electricity_meter/my_sql_writer.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/my_sql_writer$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/my_sql_writer$(DependSuffix): my_sql_writer.cpp
-	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/my_sql_writer$(ObjectSuffix) -MF$(IntermediateDirectory)/my_sql_writer$(DependSuffix) -MM "/home/scad-energy/.codelite/Server/electricity_meter/my_sql_writer.cpp"
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/my_sql_writer$(ObjectSuffix) -MF$(IntermediateDirectory)/my_sql_writer$(DependSuffix) -MM "/home/kor/scad-energy-counter/srcs/electricity_meter/my_sql_writer.cpp"
 
 $(IntermediateDirectory)/my_sql_writer$(PreprocessSuffix): my_sql_writer.cpp
-	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/my_sql_writer$(PreprocessSuffix) "/home/scad-energy/.codelite/Server/electricity_meter/my_sql_writer.cpp"
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/my_sql_writer$(PreprocessSuffix) "/home/kor/scad-energy-counter/srcs/electricity_meter/my_sql_writer.cpp"
 
 $(IntermediateDirectory)/exception$(ObjectSuffix): exception.cpp $(IntermediateDirectory)/exception$(DependSuffix)
-	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/scad-energy/.codelite/Server/electricity_meter/exception.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/exception$(ObjectSuffix) $(IncludePath)
+	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/kor/scad-energy-counter/srcs/electricity_meter/exception.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/exception$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/exception$(DependSuffix): exception.cpp
-	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/exception$(ObjectSuffix) -MF$(IntermediateDirectory)/exception$(DependSuffix) -MM "/home/scad-energy/.codelite/Server/electricity_meter/exception.cpp"
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/exception$(ObjectSuffix) -MF$(IntermediateDirectory)/exception$(DependSuffix) -MM "/home/kor/scad-energy-counter/srcs/electricity_meter/exception.cpp"
 
 $(IntermediateDirectory)/exception$(PreprocessSuffix): exception.cpp
-	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/exception$(PreprocessSuffix) "/home/scad-energy/.codelite/Server/electricity_meter/exception.cpp"
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/exception$(PreprocessSuffix) "/home/kor/scad-energy-counter/srcs/electricity_meter/exception.cpp"
 
 $(IntermediateDirectory)/generic_socket$(ObjectSuffix): generic_socket.cpp $(IntermediateDirectory)/generic_socket$(DependSuffix)
-	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/scad-energy/.codelite/Server/electricity_meter/generic_socket.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/generic_socket$(ObjectSuffix) $(IncludePath)
+	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/kor/scad-energy-counter/srcs/electricity_meter/generic_socket.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/generic_socket$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/generic_socket$(DependSuffix): generic_socket.cpp
-	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/generic_socket$(ObjectSuffix) -MF$(IntermediateDirectory)/generic_socket$(DependSuffix) -MM "/home/scad-energy/.codelite/Server/electricity_meter/generic_socket.cpp"
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/generic_socket$(ObjectSuffix) -MF$(IntermediateDirectory)/generic_socket$(DependSuffix) -MM "/home/kor/scad-energy-counter/srcs/electricity_meter/generic_socket.cpp"
 
 $(IntermediateDirectory)/generic_socket$(PreprocessSuffix): generic_socket.cpp
-	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/generic_socket$(PreprocessSuffix) "/home/scad-energy/.codelite/Server/electricity_meter/generic_socket.cpp"
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/generic_socket$(PreprocessSuffix) "/home/kor/scad-energy-counter/srcs/electricity_meter/generic_socket.cpp"
 
 $(IntermediateDirectory)/server_socket$(ObjectSuffix): server_socket.cpp $(IntermediateDirectory)/server_socket$(DependSuffix)
-	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/scad-energy/.codelite/Server/electricity_meter/server_socket.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/server_socket$(ObjectSuffix) $(IncludePath)
+	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/kor/scad-energy-counter/srcs/electricity_meter/server_socket.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/server_socket$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/server_socket$(DependSuffix): server_socket.cpp
-	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/server_socket$(ObjectSuffix) -MF$(IntermediateDirectory)/server_socket$(DependSuffix) -MM "/home/scad-energy/.codelite/Server/electricity_meter/server_socket.cpp"
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/server_socket$(ObjectSuffix) -MF$(IntermediateDirectory)/server_socket$(DependSuffix) -MM "/home/kor/scad-energy-counter/srcs/electricity_meter/server_socket.cpp"
 
 $(IntermediateDirectory)/server_socket$(PreprocessSuffix): server_socket.cpp
-	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/server_socket$(PreprocessSuffix) "/home/scad-energy/.codelite/Server/electricity_meter/server_socket.cpp"
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/server_socket$(PreprocessSuffix) "/home/kor/scad-energy-counter/srcs/electricity_meter/server_socket.cpp"
 
 $(IntermediateDirectory)/mysql_writer_factory$(ObjectSuffix): mysql_writer_factory.cpp $(IntermediateDirectory)/mysql_writer_factory$(DependSuffix)
-	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/scad-energy/.codelite/Server/electricity_meter/mysql_writer_factory.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/mysql_writer_factory$(ObjectSuffix) $(IncludePath)
+	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/kor/scad-energy-counter/srcs/electricity_meter/mysql_writer_factory.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/mysql_writer_factory$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/mysql_writer_factory$(DependSuffix): mysql_writer_factory.cpp
-	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/mysql_writer_factory$(ObjectSuffix) -MF$(IntermediateDirectory)/mysql_writer_factory$(DependSuffix) -MM "/home/scad-energy/.codelite/Server/electricity_meter/mysql_writer_factory.cpp"
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/mysql_writer_factory$(ObjectSuffix) -MF$(IntermediateDirectory)/mysql_writer_factory$(DependSuffix) -MM "/home/kor/scad-energy-counter/srcs/electricity_meter/mysql_writer_factory.cpp"
 
 $(IntermediateDirectory)/mysql_writer_factory$(PreprocessSuffix): mysql_writer_factory.cpp
-	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/mysql_writer_factory$(PreprocessSuffix) "/home/scad-energy/.codelite/Server/electricity_meter/mysql_writer_factory.cpp"
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/mysql_writer_factory$(PreprocessSuffix) "/home/kor/scad-energy-counter/srcs/electricity_meter/mysql_writer_factory.cpp"
+
+$(IntermediateDirectory)/modem$(ObjectSuffix): modem.cpp $(IntermediateDirectory)/modem$(DependSuffix)
+	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/kor/scad-energy-counter/srcs/electricity_meter/modem.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/modem$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/modem$(DependSuffix): modem.cpp
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/modem$(ObjectSuffix) -MF$(IntermediateDirectory)/modem$(DependSuffix) -MM "/home/kor/scad-energy-counter/srcs/electricity_meter/modem.cpp"
+
+$(IntermediateDirectory)/modem$(PreprocessSuffix): modem.cpp
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/modem$(PreprocessSuffix) "/home/kor/scad-energy-counter/srcs/electricity_meter/modem.cpp"
+
+$(IntermediateDirectory)/scheduled_actions$(ObjectSuffix): scheduled_actions.cpp $(IntermediateDirectory)/scheduled_actions$(DependSuffix)
+	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/kor/scad-energy-counter/srcs/electricity_meter/scheduled_actions.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/scheduled_actions$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/scheduled_actions$(DependSuffix): scheduled_actions.cpp
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/scheduled_actions$(ObjectSuffix) -MF$(IntermediateDirectory)/scheduled_actions$(DependSuffix) -MM "/home/kor/scad-energy-counter/srcs/electricity_meter/scheduled_actions.cpp"
+
+$(IntermediateDirectory)/scheduled_actions$(PreprocessSuffix): scheduled_actions.cpp
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/scheduled_actions$(PreprocessSuffix) "/home/kor/scad-energy-counter/srcs/electricity_meter/scheduled_actions.cpp"
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)
@@ -192,7 +208,13 @@ clean:
 	$(RM) $(IntermediateDirectory)/mysql_writer_factory$(ObjectSuffix)
 	$(RM) $(IntermediateDirectory)/mysql_writer_factory$(DependSuffix)
 	$(RM) $(IntermediateDirectory)/mysql_writer_factory$(PreprocessSuffix)
+	$(RM) $(IntermediateDirectory)/modem$(ObjectSuffix)
+	$(RM) $(IntermediateDirectory)/modem$(DependSuffix)
+	$(RM) $(IntermediateDirectory)/modem$(PreprocessSuffix)
+	$(RM) $(IntermediateDirectory)/scheduled_actions$(ObjectSuffix)
+	$(RM) $(IntermediateDirectory)/scheduled_actions$(DependSuffix)
+	$(RM) $(IntermediateDirectory)/scheduled_actions$(PreprocessSuffix)
 	$(RM) $(OutputFile)
-	$(RM) "/home/scad-energy/.codelite/Server/.build-debug/electricity_meter"
+	$(RM) "/home/kor/scad-energy-counter/srcs/.build-debug/electricity_meter"
 
 

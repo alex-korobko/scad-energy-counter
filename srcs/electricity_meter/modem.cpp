@@ -6,15 +6,15 @@ using namespace std;
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <inttypes.h>
+#include <string.h>
+#include <iostream>
 
 //for usleep
 #include <unistd.h>
 
 //for devctl
-#include <devctl.h>
-#include <sys/dcmd_chr.h>
-
-#include <iostream.h>
+#include <termios.h>
+#include <unistd.h>
 
 //stl headers
 #include <string>
@@ -24,6 +24,8 @@ using namespace std;
 #include <sstream>
 
 //local headers
+#include "common_declarations.h"
+#include "logger.h"
 #include "comport_exception.h"
 #include "comport.h"
 
@@ -36,8 +38,8 @@ comport::comport (
 	    byte parity,
 	    byte data_bits,
 	    byte stop_bits,
-	    int delay_useconds=0,
-        float comport_koeff=1.0)  throw (comport_exception)  :
+	    int delay_useconds,
+        float comport_koeff)  throw (comport_exception)  :
 	    		m_port_handle(-1),
 	    	    m_dev_port("/dev/ser"),
 	    	    m_baud_rate(baud_rate),
@@ -171,8 +173,7 @@ comport::~comport() throw (comport_exception){
 };
 
 void comport::send(comport_data_block data_to_send, 
-								bool flush_io_buffers_after_send = false,
-								unsigned int rts_delay = 5000) throw (comport_exception){
+								bool flush_io_buffers_after_send) throw (comport_exception){
 	static int  delay_messages_counter = 0;
 	ostringstream exception_message;
 	int count_of_sended_bytes;
@@ -185,17 +186,9 @@ void comport::send(comport_data_block data_to_send,
 		throw comport_exception(exception_message.str());
 	};
 
-	if (rts_delay >0) {
-    		set_rts_state(comport::RTS_SET_1);	
-    		usleep(rts_delay);
-		};
 	count_of_sended_bytes=write(m_port_handle,
                                                      &data_to_send[0],
                                                      data_to_send.size());
-	if (rts_delay > 0) {
-   		usleep(rts_delay);
-   		set_rts_state(comport::RTS_SET_0);	
-	};
 
 	if (static_cast<comport_data_block::size_type >(count_of_sended_bytes)!=data_to_send.size()) {
 		exception_message<<"Can`t  write "<<data_to_send.size()<<" bytes to "<<m_dev_port;
@@ -217,7 +210,7 @@ if (delay_messages_counter >64) {
 	delay_messages_counter = 0;
    ostringstream description;
    description<<"Curr delay is " <<echo_interval<<" mkS predef delay is "<<m_delay_useconds<<" mkS";
-   program_settings::get_instance()->sys_message(program_settings::INFO_MSG, description.str());
+   logger::Instance().LogMessage(INFO, description.str());
 };
 	delay_messages_counter++;
 
@@ -239,47 +232,12 @@ if (delay_messages_counter >64) {
 
 };
 
-/*
-void comport::flush_input_buffer() throw (comport_exception){
-
-    if (tcflush(m_port_handle, TCIFLUSH)<0) {
-                ostringstream exception_message;
-		exception_message<<"Can`t flush input stream "<<strerror(errno);
-		 if (close(m_port_handle)!=0)
-	 		 exception_message<<"  Can`t close "<<m_dev_port<<" : "<<strerror(errno);
-		m_port_handle =-1;		
-		throw comport_exception(exception_message.str());
-    };
-};
-
-void comport::flush_output_buffer() throw (comport_exception){
-    if (tcflush(m_port_handle, TCOFLUSH)<0) {
-                ostringstream exception_message;
-		exception_message<<"Can`t flush output stream "<<strerror(errno);
-		 if (close(m_port_handle)!=0)
-	 		 exception_message<<"  Can`t close "<<m_dev_port<<" : "<<strerror(errno);
-		m_port_handle =-1;		
-		throw comport_exception(exception_message.str());
-    };
-};
-
-void comport::flush_input_output_buffer() throw (comport_exception){
-    if (tcflush(m_port_handle, TCIOFLUSH)<0) {
-                ostringstream exception_message;
-		exception_message<<"Can`t flush input and output streams "<<strerror(errno);
-		 if (close(m_port_handle)!=0)
-	 		 exception_message<<"  Can`t close "<<m_dev_port<<" : "<<strerror(errno);
-		m_port_handle =-1;		
-		throw comport_exception(exception_message.str());
-    };
-};
-*/
 
 int  comport::recv(comport::comport_data_block &buffer_to_recieve,
                      int bytes_count,
-	                 bool flush_io_buffers=false,
-				     unsigned int recieve_timeout = 10) 
-                      throw (comport_exception)
+	                 bool flush_io_buffers,
+				     unsigned int recieve_timeout) 
+					 throw (comport_exception)
 {
     comport_data_block recived_data(bytes_count), all_recieved_data;
    comport_data_block::iterator iter_on_received_data;
@@ -341,70 +299,5 @@ int  comport::recv(comport::comport_data_block &buffer_to_recieve,
 
     return bytes_read_summary;
 };    
-
-
-    
-void comport::set_rts_state (byte rts_state) throw (comport_exception) {
-//TODO it seems not to be right way to set RTS
-//I've seen in examples  that _CTL_RTS sets the RTS line to low - search in help by _CTL_RTS_CHG , check_RTS 
-ostringstream exception_message;	     
-	int data, ret_val;
-
-	//impossible
-	if (m_port_handle < 0) {
-		exception_message<<"Port "<<m_dev_port<<" not initialized";
-		throw comport_exception(exception_message.str());
-	};
-
-	if (rts_state==RTS_SET_1) {
-		data = _CTL_RTS_CHG  | _CTL_RTS;
-	} else if (rts_state==RTS_SET_0) {
-		data = _CTL_RTS_CHG  | 0;
-	} else {
-		exception_message<<"Wrong RTS state "<<static_cast<int>(rts_state)<<" for "<<m_dev_port<<" must be com_port::RTS_SET_1 or com_port::RTS_SET_0";
-		throw comport_exception(exception_message.str());
-	};
-
-	ret_val	 = devctl (m_port_handle, 
-					DCMD_CHR_SERCTL,
-					&data,
-					sizeof(data),
-					NULL);
-					
-	if (ret_val!=EOK) {
-		exception_message<<"Can`t set RTS by devctl : "<<strerror(ret_val);
-		throw comport_exception(exception_message.str());
-	};
-	
-	};
-
-
-	byte comport::get_rts_state () throw (comport_exception){
-	ostringstream exception_message;	     
-	int data = 0, ret_val;
-
-	//impossible
-	if (m_port_handle < 0) {
-		exception_message<<"Port "<<m_dev_port<<" not initialized";
-		throw comport_exception(exception_message.str());
-	};
-	
-	ret_val	 = devctl (m_port_handle, 
-					DCMD_CHR_LINESTATUS,
-					&data,
-					sizeof(data),
-					NULL);
-					
-	if (ret_val!=EOK) {
-		exception_message<<"Can`t get DCMD_CHR_LINESTATUS by devctl : "<<strerror(ret_val);
-		throw comport_exception(exception_message.str());
-	};
-
-	if ((data & _LINESTATUS_SER_RTS)!=0) {
-		return RTS_SET_1;
-	 } else  {
-		return RTS_SET_0;
-	  };
-	};
 
 };

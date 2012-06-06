@@ -13,7 +13,7 @@ public:
 	    comport_exc_descr (description) {};
 
     string get_description () {return comport_exc_descr;};
-}
+};
 
 }
 #endif
