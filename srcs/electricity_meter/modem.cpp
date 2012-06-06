@@ -26,28 +26,28 @@ using namespace std;
 //local headers
 #include "common_declarations.h"
 #include "logger.h"
-#include "comport_exception.h"
-#include "comport.h"
+#include "modem_exception.h"
+#include "modem.h"
 
 namespace electricity_meter
 {
 
-comport::comport (
+modem::modem (
     	int  port_number,
         int baud_rate,
 	    byte parity,
 	    byte data_bits,
 	    byte stop_bits,
 	    int delay_useconds,
-        float comport_koeff)  throw (comport_exception)  :
+        float modem_koeff)  throw (modem_exception)  :
 	    		m_port_handle(-1),
-	    	    m_dev_port("/dev/ser"),
+	    	    m_dev_port("/dev/ttyS"),
 	    	    m_baud_rate(baud_rate),
 		    m_parity(parity),
 			m_data_bits(data_bits),
 		    m_stop_bits(stop_bits),
 		    m_delay_useconds(delay_useconds),
-            m_comport_koeff(comport_koeff) {
+            m_modem_koeff(modem_koeff) {
 
 	struct termios termios_param;		  
 	ostringstream exception_message;	     
@@ -58,28 +58,32 @@ comport::comport (
 	exception_message.str("");
 	if (port_number < 1 || port_number > 4) {
 	 exception_message<<"Wrong com port number "<<m_dev_port;
-	 throw comport_exception(exception_message.str());
+	 throw modem_exception(exception_message.str());
 	}
 
-	if (baud_rate!=BAUD_9600 &&
-	baud_rate!=BAUD_19200 &&
-    baud_rate!=BAUD_115200 )  {
+	if ( ((!CBAUD) & baud_rate != 0 ) || 
+		(baud_rate == 0)){ // 0 means that line is disabled - there is no use for that
 		exception_message<<"Wrong baud rate value "<<baud_rate;
-	    throw comport_exception(exception_message.str());
+	    throw modem_exception(exception_message.str());
     }
 
 	if ((m_port_handle = open(m_dev_port.c_str(), 
-										O_RDWR))<0) {
-	exception_message<<"Can`t open com port "<<m_dev_port<<" : "<<strerror(errno);
-	 throw comport_exception(exception_message.str());
+							O_RDWR | O_NOCTTY | O_NDELAY))<0) {
+		exception_message<<"Can`t open com port "<<m_dev_port<<" : "<<strerror(errno);
+		throw modem_exception(exception_message.str());
 	 }
+	
+	if (fcntl(m_port_handle, F_SETFL, 0) < 0) { //switching to blocking read
+		exception_message<<"Call fcntl to com port "<<m_dev_port<<" failed: "<<strerror(errno);
+		throw modem_exception(exception_message.str());	
+	}
 
 	if (tcgetattr(m_port_handle, &termios_param)!=0) {
 	 exception_message<<"Can`t get the current terminal control settings for "<<m_dev_port<<" : "<<strerror(errno);
 	 if (close(m_port_handle)!=0)
 	 	 exception_message<<"  Can`t close "<<m_dev_port<<" : "<<strerror(errno);
 	 m_port_handle=-1;
-	 throw comport_exception(exception_message.str());
+	 throw modem_exception(exception_message.str());
 	}
 
 	if (cfsetispeed(&termios_param, baud_rate)!= 0){
@@ -87,7 +91,7 @@ comport::comport (
 	 if (close(m_port_handle)!=0)
 	 	 exception_message<<"  Can`t close "<<m_dev_port<<" : "<<strerror(errno);
 	 m_port_handle=-1;
-	 throw comport_exception(exception_message.str());
+	 throw modem_exception(exception_message.str());
 	}
 
 	if (cfsetospeed(&termios_param, baud_rate) != 0){
@@ -95,13 +99,15 @@ comport::comport (
 	 if (close(m_port_handle)!=0)
 	 	 exception_message<<"  Can`t close "<<m_dev_port<<" : "<<strerror(errno);
 	 m_port_handle=-1;
-	 throw comport_exception(exception_message.str());
+	 throw modem_exception(exception_message.str());
 	}
 
     termios_param.c_lflag &= ~( ECHO|ECHOE|ECHOK|ECHOKE|ECHOCTL|ECHONL|ICANON|ISIG);
-	termios_param.c_cflag &= ~CLOCAL;
+	termios_param.c_cflag |= (CLOCAL | CREAD);
 	termios_param.c_iflag &= ~IMAXBEL;
-	termios_param.c_oflag &= ~ONLCR;
+	termios_param.c_oflag &= ~ (ONLCR | OPOST);
+	termios_param.c_cc[VMIN] = 0;
+	termios_param.c_cc[VTIME] = 10;
 	
 	if (data_bits==DATA_BITS_5) {
 			termios_param.c_cflag |= CS5;
@@ -116,7 +122,7 @@ comport::comport (
 	 	 if (close(m_port_handle)!=0)
 		 	 exception_message<<"  Can`t close "<<m_dev_port<<" : "<<strerror(errno);
 		 m_port_handle=-1;
-	    throw comport_exception(exception_message.str());
+	    throw modem_exception(exception_message.str());
     }
 
 	if (stop_bits==STOP_BITS_1) {
@@ -128,11 +134,11 @@ comport::comport (
 	 	 if (close(m_port_handle)!=0)
 		 	 exception_message<<"  Can`t close "<<m_dev_port<<" : "<<strerror(errno);
 		 m_port_handle=-1;
-	    throw comport_exception(exception_message.str());
+	    throw modem_exception(exception_message.str());
     }
 
 	if (parity==PARITY_DISABLE) {
-			termios_param.c_cflag &=~PARENB;
+			termios_param.c_cflag &= ~PARENB ;
   	    } else if (parity==PARITY_ODD) {
  			termios_param.c_cflag |=(PARENB | PARODD);
   	    } else if (parity==PARITY_EVEN) {
@@ -142,7 +148,7 @@ comport::comport (
  		 if (close(m_port_handle)!=0)
 	 		 exception_message<<"  Can`t close "<<m_dev_port<<" : "<<strerror(errno);
 		 m_port_handle=-1;
-	    throw comport_exception(exception_message.str());
+	    throw modem_exception(exception_message.str());
 	  }
 	
 	if (tcsetattr(m_port_handle, TCSANOW , &termios_param)!=0){
@@ -150,30 +156,30 @@ comport::comport (
 	 if (close(m_port_handle)!=0)
 	 	 exception_message<<"  Can`t close "<<m_dev_port<<" : "<<strerror(errno);
 	 m_port_handle=-1;
-	 throw comport_exception(exception_message.str());
+	 throw modem_exception(exception_message.str());
 	}
 
-    if (	tcflush(m_port_handle, TCIOFLUSH)<0) {
+    if (tcflush(m_port_handle, TCIOFLUSH)<0) {
 		exception_message<<"Can`t flush io streams "<<strerror(errno);
 		 if (close(m_port_handle)!=0)
 	 		 exception_message<<"  Can`t close "<<m_dev_port<<" : "<<strerror(errno);
 		m_port_handle =-1;		
-		throw comport_exception(exception_message.str());
+		throw modem_exception(exception_message.str());
     };
 };
 
-comport::~comport() throw (comport_exception){
+modem::~modem() throw (modem_exception){
 	ostringstream exception_message;	     
 		if (m_port_handle>0) {
 			if (close(m_port_handle)<0) {
 			exception_message<<"Can`t close "<<m_dev_port<<" : "<<strerror(errno);
-			throw comport_exception(exception_message.str());
+			throw modem_exception(exception_message.str());
 			};
 		}
 };
 
-void comport::send(comport_data_block data_to_send, 
-								bool flush_io_buffers_after_send) throw (comport_exception){
+void modem::send(modem_data_block data_to_send, 
+								bool flush_io_buffers_after_send) throw (modem_exception){
 	static int  delay_messages_counter = 0;
 	ostringstream exception_message;
 	int count_of_sended_bytes;
@@ -183,24 +189,24 @@ void comport::send(comport_data_block data_to_send,
 	//impossible
 	if (m_port_handle < 0) {
 		exception_message<<"Port "<<m_dev_port<<" not initialized";
-		throw comport_exception(exception_message.str());
+		throw modem_exception(exception_message.str());
 	};
 
 	count_of_sended_bytes=write(m_port_handle,
                                                      &data_to_send[0],
                                                      data_to_send.size());
 
-	if (static_cast<comport_data_block::size_type >(count_of_sended_bytes)!=data_to_send.size()) {
+	if (static_cast<modem_data_block::size_type >(count_of_sended_bytes)!=data_to_send.size()) {
 		exception_message<<"Can`t  write "<<data_to_send.size()<<" bytes to "<<m_dev_port;
 		if (count_of_sended_bytes<0) 
 				exception_message<<" : "<<strerror(errno);
-		throw comport_exception(exception_message.str());
+		throw modem_exception(exception_message.str());
 	};
 
   if (m_delay_useconds==0) {
 	   echo_interval=  static_cast<useconds_t> (
                                   (m_data_bits+m_stop_bits+parity_bits_delay_koeff)*1000000
-                                  *data_to_send.size()*m_comport_koeff/m_baud_rate
+                                  *data_to_send.size()*m_modem_koeff/m_baud_rate
                                    );
 	} else {
 		echo_interval=m_delay_useconds;
@@ -226,28 +232,28 @@ if (delay_messages_counter >64) {
 			 if (close(m_port_handle)!=0)
  					exception_message<<"  Can`t close "<<m_dev_port<<" : "<<strerror(errno);
              m_port_handle =-1;		
-			throw comport_exception(exception_message.str());
+			throw modem_exception(exception_message.str());
     };
 }; // if (flush_io_buffers_after_send)
 
 };
 
 
-int  comport::recv(comport::comport_data_block &buffer_to_recieve,
+int  modem::recv(modem::modem_data_block &buffer_to_recieve,
                      int bytes_count,
 	                 bool flush_io_buffers,
 				     unsigned int recieve_timeout) 
-					 throw (comport_exception)
+					 throw (modem_exception)
 {
-    comport_data_block recived_data(bytes_count), all_recieved_data;
-   comport_data_block::iterator iter_on_received_data;
+    modem_data_block recived_data(bytes_count), all_recieved_data;
+   modem_data_block::iterator iter_on_received_data;
 	ostringstream exception_message;	     
 	int  bytes_read, bytes_read_summary=0;
 
 	//impossible
 	if (m_port_handle < 0) {
 		exception_message<<"Port "<<m_dev_port<<" not initialized";
-		throw comport_exception(exception_message.str());
+		throw modem_exception(exception_message.str());
 	};
 
     if (flush_io_buffers) {
@@ -261,7 +267,7 @@ int  comport::recv(comport::comport_data_block &buffer_to_recieve,
 	 if (close(m_port_handle)!=0)
  		exception_message<<"  Can`t close "<<m_dev_port<<" : "<<strerror(errno);
                 m_port_handle =-1;		
-		throw comport_exception(exception_message.str());
+		throw modem_exception(exception_message.str());
     };
   }; // if (flush_io_buffers) {
 
@@ -276,7 +282,7 @@ int  comport::recv(comport::comport_data_block &buffer_to_recieve,
 
     	if (bytes_read<0) {
  		exception_message<<"Can`t  read from "<<m_dev_port<<" : "<<strerror(errno);
-		throw comport_exception(exception_message.str());
+		throw modem_exception(exception_message.str());
     	};
 
        if (bytes_read==0) {
@@ -294,7 +300,7 @@ int  comport::recv(comport::comport_data_block &buffer_to_recieve,
 
      if (bytes_read_summary!=bytes_count) {
  		exception_message<<"Too little bytes recieved: must be "<<bytes_count<<" but "<<bytes_read_summary;
-		throw comport_exception(exception_message.str());
+		throw modem_exception(exception_message.str());
      };
 
     return bytes_read_summary;
