@@ -1,6 +1,7 @@
 #include <string>
 #include <stdexcept>
 #include <mysql.h>
+#include <termios.h>
 
 #include "common_declarations.h"
 

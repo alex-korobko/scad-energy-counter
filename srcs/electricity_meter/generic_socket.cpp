@@ -7,6 +7,7 @@
 #include <inttypes.h>
 #include <errno.h>
 #include <string.h>
+#include <termios.h>
 
 #include <vector>
 #include <string>
@@ -14,6 +15,7 @@
 #include <functional>
 #include <sstream>
 #include <stdexcept>
+
 
 #include "common_declarations.h"
 #include "exception.h"

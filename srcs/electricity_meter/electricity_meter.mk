@@ -13,7 +13,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=Alex
-Date                   :=06/07/2012
+Date                   :=06/08/2012
 CodeLitePath           :="/home/kor/.codelite"
 LinkerName             :=g++
 ArchiveTool            :=ar rcus
@@ -53,7 +53,7 @@ LibPath                := $(LibraryPathSwitch).
 ##
 CodeLiteDir:=/usr/share/codelite
 Objects=$(IntermediateDirectory)/main$(ObjectSuffix) $(IntermediateDirectory)/reciever$(ObjectSuffix) $(IntermediateDirectory)/configurator$(ObjectSuffix) $(IntermediateDirectory)/packets_processor$(ObjectSuffix) $(IntermediateDirectory)/logger$(ObjectSuffix) $(IntermediateDirectory)/my_sql_writer$(ObjectSuffix) $(IntermediateDirectory)/exception$(ObjectSuffix) $(IntermediateDirectory)/generic_socket$(ObjectSuffix) $(IntermediateDirectory)/server_socket$(ObjectSuffix) $(IntermediateDirectory)/mysql_writer_factory$(ObjectSuffix) \
-	$(IntermediateDirectory)/modem$(ObjectSuffix) $(IntermediateDirectory)/scheduled_actions$(ObjectSuffix) $(IntermediateDirectory)/scheduled_action$(ObjectSuffix) 
+	$(IntermediateDirectory)/modem$(ObjectSuffix) $(IntermediateDirectory)/scheduled_actions$(ObjectSuffix) $(IntermediateDirectory)/scheduled_action$(ObjectSuffix) $(IntermediateDirectory)/scheduled_action_read_data$(ObjectSuffix) 
 
 ##
 ## Main Build Targets 
@@ -180,6 +180,14 @@ $(IntermediateDirectory)/scheduled_action$(DependSuffix): scheduled_action.cpp
 $(IntermediateDirectory)/scheduled_action$(PreprocessSuffix): scheduled_action.cpp
 	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/scheduled_action$(PreprocessSuffix) "/home/kor/scad-energy-counter/srcs/electricity_meter/scheduled_action.cpp"
 
+$(IntermediateDirectory)/scheduled_action_read_data$(ObjectSuffix): scheduled_action_read_data.cpp $(IntermediateDirectory)/scheduled_action_read_data$(DependSuffix)
+	$(CompilerName) $(IncludePCH) $(SourceSwitch) "/home/kor/scad-energy-counter/srcs/electricity_meter/scheduled_action_read_data.cpp" $(CmpOptions) $(ObjectSwitch)$(IntermediateDirectory)/scheduled_action_read_data$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/scheduled_action_read_data$(DependSuffix): scheduled_action_read_data.cpp
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/scheduled_action_read_data$(ObjectSuffix) -MF$(IntermediateDirectory)/scheduled_action_read_data$(DependSuffix) -MM "/home/kor/scad-energy-counter/srcs/electricity_meter/scheduled_action_read_data.cpp"
+
+$(IntermediateDirectory)/scheduled_action_read_data$(PreprocessSuffix): scheduled_action_read_data.cpp
+	@$(CompilerName) $(CmpOptions) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/scheduled_action_read_data$(PreprocessSuffix) "/home/kor/scad-energy-counter/srcs/electricity_meter/scheduled_action_read_data.cpp"
+
 
 -include $(IntermediateDirectory)/*$(DependSuffix)
 ##
@@ -225,6 +233,9 @@ clean:
 	$(RM) $(IntermediateDirectory)/scheduled_action$(ObjectSuffix)
 	$(RM) $(IntermediateDirectory)/scheduled_action$(DependSuffix)
 	$(RM) $(IntermediateDirectory)/scheduled_action$(PreprocessSuffix)
+	$(RM) $(IntermediateDirectory)/scheduled_action_read_data$(ObjectSuffix)
+	$(RM) $(IntermediateDirectory)/scheduled_action_read_data$(DependSuffix)
+	$(RM) $(IntermediateDirectory)/scheduled_action_read_data$(PreprocessSuffix)
 	$(RM) $(OutputFile)
 	$(RM) "/home/kor/scad-energy-counter/srcs/.build-debug/electricity_meter"
 

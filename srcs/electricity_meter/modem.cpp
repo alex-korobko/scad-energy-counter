@@ -237,7 +237,7 @@ if (delay_messages_counter >64) {
 	delay_messages_counter = 0;
    ostringstream description;
    description<<"Curr delay is " <<echo_interval<<" mkS predef delay is "<<m_delay_useconds<<" mkS";
-   logger::Instance().LogMessage(INFO, description.str());
+   logger::instance().log_message(INFO, description.str());
 };
 	delay_messages_counter++;
 

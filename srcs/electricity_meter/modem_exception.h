@@ -6,13 +6,13 @@ namespace electricity_meter
 
 class modem_exception {
 private:
-    string modem_exc_descr;
+    std::string modem_exc_descr;
 
 public:
-    explicit modem_exception (string description) : 
+    explicit modem_exception (std::string description) : 
 	    modem_exc_descr (description) {};
 
-    string get_description () {return modem_exc_descr;};
+    std::string get_description () {return modem_exc_descr;};
 };
 
 }

@@ -9,12 +9,12 @@ class server_socket;
 class reciever {
 
 public:
-	static reciever& Instance();
+	static reciever& instance();
 
-	void StartRecieve(uint64_t PortNumber,
-						unsigned int SendRecvTimeout,
-						unsigned short MaxConnectQueue);
-	void StopRecieve();
+	void start_recieve(uint64_t port_number,
+						unsigned int send_recv_timeout,
+						unsigned short max_connect_queue);
+	void stop_recieve();
 private:
 	bool mStopRecieveFlag;
 	std::auto_ptr<server_socket> mSocket;

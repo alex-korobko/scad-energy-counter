@@ -1,5 +1,6 @@
 #include <string>
 #include <stdexcept>
+#include <termios.h>
 
 #include "common_declarations.h"
 
