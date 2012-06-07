@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <termios.h>
 
 #include <string.h>
 #include <sys/types.h>

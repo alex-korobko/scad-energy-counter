@@ -1,6 +1,7 @@
 #include <string>
 #include <stdexcept>
 #include <syslog.h>
+#include <termios.h>
 
 #include "common_declarations.h"
 
@@ -10,7 +11,7 @@
 namespace electricity_meter
 {
 
-logger::logger() :mAppVersion("0.0.0.0"), mAppName ("electricity_meter")
+logger::logger() :m_app_version("0.0.0.0"), m_app_name ("unset")
 {
 }
 
@@ -19,23 +20,23 @@ logger::~logger()
 	closelog();
 }
 
-logger& logger::Instance()
+logger& logger::instance()
 {
 	static logger instLogg;
 	return instLogg;
 }
 
-void logger::Initialize()
+void logger::initialize()
 {
-	openlog(mAppName.c_str(), LOG_PID, LOG_LOCAL5);
+	openlog(m_app_name.c_str(), LOG_PID, LOG_LOCAL5);
 };
 
-void logger::LogMessage (const exception& exc)
+void logger::log_message (const exception& exc)
 {
-	LogMessage(exc.GetMessType(), exc.what());
+	log_message(exc.GetMessType(), exc.what());
 }
 
-void logger::LogMessage (MessType TypeOfMess, const std::string &Message)
+void logger::log_message (MessType TypeOfMess, const std::string &Message)
 {
 	int level;
 	std::string FullMessage;
@@ -58,7 +59,7 @@ void logger::LogMessage (MessType TypeOfMess, const std::string &Message)
 	};
 	
 	FullMessage="v";
-	FullMessage+=mAppVersion;
+	FullMessage+=m_app_version;
 	FullMessage+=" ";
 	FullMessage+=type_of_mess;
 	FullMessage+=" ";

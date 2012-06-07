@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include <termios.h>
 
 #include "common_declarations.h"
 #include "exception.h"

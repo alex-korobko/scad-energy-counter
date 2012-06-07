@@ -11,6 +11,7 @@
 #include <sstream>
 #include <mysql.h>
 #include <errno.h>
+#include <termios.h>
 
 #include "common_declarations.h"
 #include "exception.h"
@@ -23,12 +24,6 @@
 #include "socket_exception.h"
 #include "generic_socket.h"
 #include "server_socket.h"
-
-namespace {
-	enum {EOK=0};
-	enum {CODE_TIMER=0, CODE_RING, CODE_ALARM};
-	enum {ETX = 3, DLE=16};
-};
 
 namespace electricity_meter
 {
@@ -100,7 +95,7 @@ reciever& reciever::operator=(const reciever& rhs)
 	return *this;
 }
 
-reciever& reciever::Instance()
+reciever& reciever::instance()
 {
 	static reciever recInst;
 	return recInst;
@@ -138,7 +133,7 @@ static bool recieve_data_packet(generic_socket* Socket, std::vector<byte>& Packe
 		Socket->recv(TmpBuffer, ContinueDataTransferLen);
 	} catch (socket_exception exc) 
 	{
-		logger::Instance().LogMessage(exc);
+		logger::instance().log_message(exc);
 		delete (Socket);
 		return false;		
 	};
@@ -150,7 +145,7 @@ static bool recieve_data_packet(generic_socket* Socket, std::vector<byte>& Packe
 	
 	if (PacketDataLength<0)
 	{
-		logger::Instance().LogMessage(ERROR, "recieve_data_packet : PacketDataLength < 0");
+		logger::instance().log_message(ERROR, "recieve_data_packet : PacketDataLength < 0");
 		delete (Socket);
 		return false;		
 	};
@@ -160,7 +155,7 @@ static bool recieve_data_packet(generic_socket* Socket, std::vector<byte>& Packe
 		Socket->recv(TmpBuffer, PacketDataLength);
 	} catch (socket_exception exc) 
 	{
-		logger::Instance().LogMessage(exc);
+		logger::instance().log_message(exc);
 		delete (Socket);
 		return false;		
 	};
@@ -169,7 +164,7 @@ static bool recieve_data_packet(generic_socket* Socket, std::vector<byte>& Packe
 	
 	if (PacketBuffer.size()<=2)
 	{
-		logger::Instance().LogMessage(ERROR, "recieve_data_packet:can't check CRC-packet data length <=2");
+		logger::instance().log_message(ERROR, "recieve_data_packet:can't check CRC-packet data length <=2");
 		delete (Socket);
 		return false;				
 	};
@@ -179,7 +174,7 @@ static bool recieve_data_packet(generic_socket* Socket, std::vector<byte>& Packe
 
 	if (OrigPacketCRC != PacketCRC)
 	{
-		logger::Instance().LogMessage(ERROR, "recieve_data_packet:bad CRC");
+		logger::instance().log_message(ERROR, "recieve_data_packet:bad CRC");
 		delete (Socket);
 		return false;				
 	};
@@ -194,10 +189,10 @@ const std::string FuncName = "ReceiveEnergy";
 //bytes count for an abonent
 const uint16_t NRec = 11;
 
-configurator&  conf =  configurator::Instance();
+configurator&  conf =  configurator::instance();
 int i=16, Rele, Abonent, Year, Month, Day, Hour, Minute, Second, E1, E2, E3;
 
- if (conf.GetLoggingOptions() & NET_PACKETS)
+ if (conf.logging_options() & NET_PACKETS)
  {
 	std::ostringstream strMess;
 	strMess <<FuncName.c_str()<< " the packet is ("<< pthread_self()<<")";
@@ -213,7 +208,7 @@ int i=16, Rele, Abonent, Year, Month, Day, Hour, Minute, Second, E1, E2, E3;
 		};
 	};
 	
-	logger::Instance().LogMessage(INFO, strMess.str());			
+	logger::instance().log_message(INFO, strMess.str());			
 }
 
 if (BufPacket.size() <=i)
@@ -232,7 +227,7 @@ if (BufPacket.size() <=i)
 		};
 	};
 	
-	logger::Instance().LogMessage(ERROR, strMess.str());			
+	logger::instance().log_message(ERROR, strMess.str());			
 };
 
 //decoding rele date
@@ -243,7 +238,7 @@ if (BufPacket.size() <=i)
 	std::ostringstream strMess;
 	strMess <<FuncName.c_str()<< " ("<< pthread_self()<<") ";
 	strMess << "wrong Year value in packet: " <<Year;
-	logger::Instance().LogMessage(ERROR, strMess.str());
+	logger::instance().log_message(ERROR, strMess.str());
 	return false;
   }
 
@@ -253,7 +248,7 @@ if (BufPacket.size() <=i)
 	std::ostringstream strMess;
 	strMess <<FuncName.c_str()<< " ("<< pthread_self()<<") ";
 	strMess << "wrong Month value in packet: " <<Month;
-	logger::Instance().LogMessage(ERROR, strMess.str());			
+	logger::instance().log_message(ERROR, strMess.str());			
 	return false;
  }
 
@@ -263,7 +258,7 @@ if ((Day < 1) ||(Day > 31))
 	std::ostringstream strMess;
 	strMess <<FuncName.c_str()<< " ("<< pthread_self()<<") ";
 	strMess << "wrong Day value in packet: " <<Day;
-	logger::Instance().LogMessage(ERROR, strMess.str());			
+	logger::instance().log_message(ERROR, strMess.str());			
 	return false;
  }
 
@@ -273,7 +268,7 @@ if ((Day < 1) ||(Day > 31))
 	std::ostringstream strMess;
 	strMess <<FuncName.c_str()<< " ("<< pthread_self()<<") ";
 	strMess << "wrong Hour value in packet: "<<Hour;
-	logger::Instance().LogMessage(ERROR, strMess.str());			
+	logger::instance().log_message(ERROR, strMess.str());			
 	return false;
  }
 
@@ -283,7 +278,7 @@ if ((Day < 1) ||(Day > 31))
 	std::ostringstream strMess;
 	strMess <<FuncName.c_str()<< " ("<< pthread_self()<<") ";
 	strMess << "wrong Minute value in packet: "<<Minute;
-	logger::Instance().LogMessage(ERROR, strMess.str());			
+	logger::instance().log_message(ERROR, strMess.str());			
 	return false;
  }
 Second = 0;
@@ -306,7 +301,7 @@ while(i<(BufPacket.size()-2))
 		strMess << "wrong Abonent value in packet: "<<Abonent<<" BufPacket[3] "<< static_cast<int>(BufPacket[3])
 				<<" BufPacket[4] "<<static_cast<int>(BufPacket[4])<< " BufPacket[i+0] " << static_cast<int>(BufPacket[i+0]) 
 				<<" BufPacket[i+1] "<< static_cast<int>(BufPacket[i+1]);
-		logger::Instance().LogMessage(ERROR, strMess.str());			
+		logger::instance().log_message(ERROR, strMess.str());			
 
 		i+=NRec;
 		continue;
@@ -334,7 +329,7 @@ while(i<(BufPacket.size()-2))
 			strMess <<FuncName.c_str()<< " ("<< pthread_self()<<") "
 					<< "wrong energy value in packet: E1 "<<E1<<" E2 "<< E2
 					<<" E3 "<<E3 << " Summary " << (E1+E2+E3);
-			logger::Instance().LogMessage(ERROR, strMess.str());			
+			logger::instance().log_message(ERROR, strMess.str());			
 
 			i+=NRec;
 			continue;
@@ -345,14 +340,14 @@ my_sql_writer* mysql_wrtr = NULL;
 try
   {
 
-	mysql_writer_factory& mysql_fact = mysql_writer_factory::Instance();
+	mysql_writer_factory& mysql_fact = mysql_writer_factory::instance();
 
 		try
 		  {
-			mysql_wrtr = mysql_fact.GetThreadMySQLWriter();
+			mysql_wrtr = mysql_fact.get_thread_mySQL_writer();
 			} catch (exception exc)
 			{
-				logger::Instance().LogMessage(exc);
+				logger::instance().log_message(exc);
 				i+=NRec;
 				continue;		
 			};
@@ -374,13 +369,13 @@ try
 
 
 		strSQLFull +=strSQL.str();
-		if (conf.GetLoggingOptions() & SQL_TO_WRITE)
+		if (conf.logging_options() & SQL_TO_WRITE)
 		  {
 			std::ostringstream strMess;
 			strMess<<FuncName.c_str()<< " ("<< pthread_self()<<") sql "
 					<< strSQLFull.c_str();
 
-			logger::Instance().LogMessage(INFO, strMess.str());			
+			logger::instance().log_message(INFO, strMess.str());			
 		  };	
 		mysql_wrtr->ExecuteSQL(strSQLFull);
 
@@ -390,18 +385,18 @@ try
 		  {
 				strSQLFull = "insert into enmonitor ";
 				strSQLFull +=strSQL.str();
-				if (conf.GetLoggingOptions() & SQL_TO_WRITE)
+				if (conf.logging_options() & SQL_TO_WRITE)
 				  {
 					std::ostringstream strMess;
 					strMess<<FuncName.c_str()<< " ("<< pthread_self()<<") sql "
 							<< strSQLFull;
 
-					logger::Instance().LogMessage(INFO, strMess.str());			
+					logger::instance().log_message(INFO, strMess.str());			
 				  };
 				mysql_wrtr->ExecuteSQL(strSQLFull);
 			} catch (exception exc)
 			{
-				logger::Instance().LogMessage(exc);
+				logger::instance().log_message(exc);
 			};
 		};
 
@@ -415,12 +410,12 @@ try
 		 strSQL	<< "0,";		
 		};
 		strSQL<<" DateRele=\'"<<Year<<"-"<<Month<<"-"<<Day<<" "<<Hour<<":"<<Minute<<":"<<Second<<"\' where Abonent="<<Abonent;
-		if (conf.GetLoggingOptions() & SQL_TO_WRITE)
+		if (conf.logging_options() & SQL_TO_WRITE)
 		  {
 			std::ostringstream strMess;
 			strMess<<FuncName.c_str()<< " ("<< pthread_self()<<") sql "
 					<< strSQL.str();
-			logger::Instance().LogMessage(INFO, strMess.str());			
+			logger::instance().log_message(INFO, strMess.str());			
 		  };	
 		mysql_wrtr->ExecuteSQL(strSQL.str());
 		unsigned long affectedRows = mysql_wrtr->NumRows();
@@ -429,14 +424,14 @@ try
 			std::ostringstream strErr;
 			strErr<<FuncName.c_str()<< " ("<< pthread_self()<<") sql "
 					<< strSQL.str()<< " ; affected " << affectedRows <<" rows.";
-			logger::Instance().LogMessage(ERROR, strErr.str());
+			logger::instance().log_message(ERROR, strErr.str());
 		};
 
 		mysql_wrtr->ExecuteSQL("COMMIT");
 	} catch (exception exc)
 	{
 		mysql_wrtr->ExecuteSQL("ROLLBACK");
-		logger::Instance().LogMessage(exc);
+		logger::instance().log_message(exc);
 		i+=NRec;
 		continue;		
 	};
@@ -457,9 +452,9 @@ uint currPowerIndex;
 
 my_sql_writer* mysql_wrtr = NULL;
 std::ostringstream strSQL;
-configurator&  conf =  configurator::Instance();
+configurator&  conf =  configurator::instance();
 
- if (conf.GetLoggingOptions() & NET_PACKETS)
+ if (conf.logging_options() & NET_PACKETS)
  {
 	std::ostringstream strMess;
 	strMess << FuncName.c_str() <<" the packet is ("<< pthread_self()<<")";
@@ -475,18 +470,18 @@ configurator&  conf =  configurator::Instance();
 		};
 	};
 	
-	logger::Instance().LogMessage(INFO, strMess.str());			
+	logger::instance().log_message(INFO, strMess.str());			
 }
 
 try
   {
-	mysql_writer_factory& mysql_fact = mysql_writer_factory::Instance();
-	mysql_wrtr = mysql_fact.GetThreadMySQLWriter();
+	mysql_writer_factory& mysql_fact = mysql_writer_factory::instance();
+	mysql_wrtr = mysql_fact.get_thread_mySQL_writer();
 
 } catch (exception exc)
 {
 	std::ostringstream strErr;
-	strErr<< FuncName.c_str()<<" ("<< pthread_self()<<") GetThreadMySQLWriter returned "<< exc.what();
+	strErr<< FuncName.c_str()<<" ("<< pthread_self()<<") get_thread_mySQL_writer returned "<< exc.what();
 	throw exception(strErr.str(), ERROR );			
 };
 
@@ -519,12 +514,12 @@ while (currPowerIndex <= nByte - 4)  // 4 = 2 byte length for power + 2 byte for
 	strSQL<<"insert into power (BS, Users, StatusPotreb, StatusPodkl, StatusRele, Power) values ("<<
 			BS<<","<<abonent<<","<<static_cast<uint32_t>(StatusPotreb) <<","
 			<<static_cast<uint32_t>(StatusPodkl )<<","<<static_cast<uint32_t>(StatusRele)<<","<< power <<");";
-	if (conf.GetLoggingOptions() & SQL_TO_WRITE)
+	if (conf.logging_options() & SQL_TO_WRITE)
 	  {
 		std::ostringstream strMess;
 		strMess<< FuncName.c_str() << " ("<< pthread_self()<<") sql "
 				<< strSQL.str();
-		logger::Instance().LogMessage(INFO, strMess.str());			
+		logger::instance().log_message(INFO, strMess.str());			
 	  };	
 	mysql_wrtr->ExecuteSQL(strSQL.str());
 	unsigned long affectedRows = mysql_wrtr->NumRows();
@@ -533,7 +528,7 @@ while (currPowerIndex <= nByte - 4)  // 4 = 2 byte length for power + 2 byte for
 		std::ostringstream strErr;
 		strErr<< FuncName.c_str() << " ("<< pthread_self()<<") sql "
 				<< strSQL.str()<< " ; affected " << affectedRows <<" rows.";
-		logger::Instance().LogMessage(ERROR, strErr.str());
+		logger::instance().log_message(ERROR, strErr.str());
 	};
 
 
@@ -541,7 +536,7 @@ while (currPowerIndex <= nByte - 4)  // 4 = 2 byte length for power + 2 byte for
   } catch (exception exc)
   {
 	mysql_wrtr->ExecuteSQL("ROLLBACK");
-	logger::Instance().LogMessage(exc);
+	logger::instance().log_message(exc);
   };
   
   currPowerIndex +=2;
@@ -561,9 +556,9 @@ uint32_t nByte = BufPacket.size(), i, Year;
 
 my_sql_writer* mysql_wrtr = NULL;
 std::ostringstream strSQL;
-configurator&  conf =  configurator::Instance();
+configurator&  conf =  configurator::instance();
 
- if (conf.GetLoggingOptions() & NET_PACKETS)
+ if (conf.logging_options() & NET_PACKETS)
  {
 	std::ostringstream strMess;
 	strMess << "ReceiveAlarm the packet is ("<< pthread_self()<<")";
@@ -579,7 +574,7 @@ configurator&  conf =  configurator::Instance();
 		};
 	};
 	
-	logger::Instance().LogMessage(INFO, strMess.str());			
+	logger::instance().log_message(INFO, strMess.str());			
 }
 
 if (nByte < 8) //6 data bytes + crc16
@@ -595,19 +590,19 @@ if(nRec<=0)
 {
    std::ostringstream strErr;
    strErr<< "ReceiveAlarm  ("<< pthread_self()<<") Count of alarms is "<< nRec;
-   logger::Instance().LogMessage(INFO, strErr.str());
+   logger::instance().log_message(INFO, strErr.str());
    return true;	
 };
 
 try
   {
-	mysql_writer_factory& mysql_fact = mysql_writer_factory::Instance();
-	mysql_wrtr = mysql_fact.GetThreadMySQLWriter();
+	mysql_writer_factory& mysql_fact = mysql_writer_factory::instance();
+	mysql_wrtr = mysql_fact.get_thread_mySQL_writer();
 
 } catch (exception exc)
 {
 	std::ostringstream strErr;
-	strErr<< "ReceiveAlarm ("<< pthread_self()<<") GetThreadMySQLWriter returned "<< exc.what();
+	strErr<< "ReceiveAlarm ("<< pthread_self()<<") get_thread_mySQL_writer returned "<< exc.what();
 	throw exception(strErr.str(), ERROR );			
 };
 
@@ -623,7 +618,7 @@ while(i<(nByte-2))
   {
 	std::ostringstream strErr;
 	strErr<< "ReceiveAlarm  ("<< pthread_self()<<") CodeAlarm "<<static_cast<uint32_t>(CodeAlarm)<<" ParamAlarm "<<static_cast<uint32_t>(ParamAlarm)<<" Year is "<< Year;
-	logger::Instance().LogMessage(ERROR, strErr.str());
+	logger::instance().log_message(ERROR, strErr.str());
 	i+=NREC;
 	continue;
   };
@@ -633,7 +628,7 @@ while(i<(nByte-2))
    {
 	std::ostringstream strErr;
 	strErr<< "ReceiveAlarm  ("<< pthread_self()<<") CodeAlarm "<<static_cast<uint32_t>(CodeAlarm)<<" ParamAlarm "<<static_cast<uint32_t>(ParamAlarm)<<" Month is "<< static_cast<uint32_t>(Month);
-	logger::Instance().LogMessage(ERROR, strErr.str());
+	logger::instance().log_message(ERROR, strErr.str());
 	i+=NREC;
 	continue;
    };
@@ -643,7 +638,7 @@ while(i<(nByte-2))
    {
 	std::ostringstream strErr;
 	strErr<< "ReceiveAlarm  ("<< pthread_self()<<") CodeAlarm "<<static_cast<uint32_t>(CodeAlarm)<<" ParamAlarm "<<static_cast<uint32_t>(ParamAlarm)<<" Month is "<< static_cast<uint32_t>(Month);
-	logger::Instance().LogMessage(ERROR, strErr.str());
+	logger::instance().log_message(ERROR, strErr.str());
 	i+=NREC;
 	continue;
    };
@@ -653,7 +648,7 @@ while(i<(nByte-2))
    {
 	std::ostringstream strErr;
 	strErr<< "ReceiveAlarm  ("<< pthread_self()<<") CodeAlarm "<<static_cast<uint32_t>(CodeAlarm)<<" ParamAlarm "<<static_cast<uint32_t>(ParamAlarm)<<" Hour is "<< static_cast<uint32_t>(Hour);
-	logger::Instance().LogMessage(ERROR, strErr.str());
+	logger::instance().log_message(ERROR, strErr.str());
 	i+=NREC;
 	continue;
    }
@@ -663,7 +658,7 @@ while(i<(nByte-2))
    {
 	std::ostringstream strErr;
 	strErr<< "ReceiveAlarm  ("<< pthread_self()<<") CodeAlarm "<<static_cast<uint32_t>(CodeAlarm)<<" ParamAlarm "<<static_cast<uint32_t>(ParamAlarm)<<" Minute is "<< static_cast<uint32_t>(Minute);
-	logger::Instance().LogMessage(ERROR, strErr.str());
+	logger::instance().log_message(ERROR, strErr.str());
 	i+=NREC;
 	continue;
    }
@@ -674,12 +669,12 @@ try
 	strSQL.clear();
 	strSQL<<"insert into alarm (BS, Code, Param, DAlarm, LoginOperator) values ("<<BS<<","<<static_cast<uint32_t>(CodeAlarm)<<","<<static_cast<uint32_t>(ParamAlarm)
 		  <<",'"<<Year<<"-"<<static_cast<uint32_t>(Month)<<"-"<<static_cast<uint32_t>(Day)<<" "<<static_cast<uint32_t>(Hour)<<":"<<static_cast<uint32_t>(Minute)<<":"<<static_cast<uint32_t>(Second)<<"', '.');";
-	if (conf.GetLoggingOptions() & SQL_TO_WRITE)
+	if (conf.logging_options() & SQL_TO_WRITE)
 	  {
 		std::ostringstream strMess;
 		strMess<< "ReceiveAlarm ("<< pthread_self()<<") sql "
 				<< strSQL.str();
-		logger::Instance().LogMessage(INFO, strMess.str());			
+		logger::instance().log_message(INFO, strMess.str());			
 	  };	
 	mysql_wrtr->ExecuteSQL(strSQL.str());
 	unsigned long affectedRows = mysql_wrtr->NumRows();
@@ -688,7 +683,7 @@ try
 		std::ostringstream strErr;
 		strErr<< "ReceiveAlarm ("<< pthread_self()<<") sql "
 				<< strSQL.str()<< " ; affected " << affectedRows <<" rows.";
-		logger::Instance().LogMessage(ERROR, strErr.str());
+		logger::instance().log_message(ERROR, strErr.str());
 	};
 
 
@@ -696,7 +691,7 @@ try
   } catch (exception exc)
   {
 	mysql_wrtr->ExecuteSQL("ROLLBACK");
-	logger::Instance().LogMessage(exc);
+	logger::instance().log_message(exc);
   };
 
 
@@ -715,19 +710,19 @@ int Abonent, IntervalPoint, CountPoint;
 std::vector<byte> RetBuff(Length, static_cast<byte> (0));
 MYSQL_ROW row;
 my_sql_writer* mysql_wrtr = NULL;
-configurator&  conf =  configurator::Instance();
+configurator&  conf =  configurator::instance();
 
 try
   {
-	mysql_writer_factory& mysql_fact = mysql_writer_factory::Instance();
+	mysql_writer_factory& mysql_fact = mysql_writer_factory::instance();
 
 		try
 		  {
-			mysql_wrtr = mysql_fact.GetThreadMySQLWriter();
+			mysql_wrtr = mysql_fact.get_thread_mySQL_writer();
 			} catch (exception exc)
 			{
 				std::ostringstream strErr;
-				strErr<<FunctionName.c_str() << " ("<< pthread_self()<<") GetThreadMySQLWriter returned "<< exc.what();
+				strErr<<FunctionName.c_str() << " ("<< pthread_self()<<") get_thread_mySQL_writer returned "<< exc.what();
 				throw exception(strErr.str(), ERROR );			
 			};
 
@@ -763,7 +758,7 @@ try
 		  RetBuff[Length-2] = static_cast<uint8_t>(crc >> 8);
 		  RetBuff[Length-1] = static_cast<uint8_t>(crc);
 
-		if (conf.GetLoggingOptions() & NET_PACKETS)
+		if (conf.logging_options() & NET_PACKETS)
 		{
 			std::ostringstream strMess;
 			strMess <<FunctionName.c_str()<<" ("<< pthread_self()<<") packet ";
@@ -778,12 +773,12 @@ try
 				};
 			};
 			
-			logger::Instance().LogMessage(INFO, strMess.str());
+			logger::instance().log_message(INFO, strMess.str());
 		};
 		Socket->send(RetBuff);
   } catch (exception exc)
   {
-	logger::Instance().LogMessage(exc);
+	logger::instance().log_message(exc);
 	return false;
   };
 	
@@ -801,19 +796,19 @@ MYSQL_ROW row;
 my_sql_writer* mysql_wrtr = NULL;
 uint32_t TempTime;
 tm LocalTime;
-configurator&  conf =  configurator::Instance();
+configurator&  conf =  configurator::instance();
 
 try
   {
-	mysql_writer_factory& mysql_fact = mysql_writer_factory::Instance();
+	mysql_writer_factory& mysql_fact = mysql_writer_factory::instance();
 
 		try
 		  {
-			mysql_wrtr = mysql_fact.GetThreadMySQLWriter();
+			mysql_wrtr = mysql_fact.get_thread_mySQL_writer();
 			} catch (exception exc)
 			{
 				std::ostringstream strErr;
-				strErr<<FunctionName.c_str()<< " ("<< pthread_self()<<") GetThreadMySQLWriter returned "<< exc.what();
+				strErr<<FunctionName.c_str()<< " ("<< pthread_self()<<") get_thread_mySQL_writer returned "<< exc.what();
 				throw exception(strErr.str(), ERROR );			
 			};
 
@@ -869,12 +864,12 @@ try
 
 		  std::ostringstream strSQL;
 		  strSQL<<"select HalfPic1, Pic1, HalfPic2, Pic2, HalfPic3, Night from tz where Num =" << LocalTime.tm_mon+1; //tm_mon started from 0 but monthis in DB from 1
-		  if (conf.GetLoggingOptions() & SQL_TO_READ)
+		  if (conf.logging_options() & SQL_TO_READ)
 			  {
 				std::ostringstream strMess;
 				strMess<<FunctionName.c_str()<< " ("<< pthread_self()<<") sql "
 						<< strSQL.str();
-				logger::Instance().LogMessage(INFO, strMess.str());			
+				logger::instance().log_message(INFO, strMess.str());			
 			  };
 			mysql_wrtr->ExecuteSQL(strSQL.str()); 
 			if (mysql_wrtr->NumRows()!= 1)
@@ -932,12 +927,12 @@ try
 
 		  strSQL.str("");
 		  strSQL<<"Select Disbalans,TimeDisbalans  from gsm where BSNum = " << ClientInPacket;
-		  if (conf.GetLoggingOptions() & SQL_TO_READ)
+		  if (conf.logging_options() & SQL_TO_READ)
 			  {
 				std::ostringstream strMess;
 				strMess<<FunctionName.c_str()<< " ("<< pthread_self()<<") sql "
 						<< strSQL.str();
-				logger::Instance().LogMessage(INFO, strMess.str());			
+				logger::instance().log_message(INFO, strMess.str());			
 			  };
 		  mysql_wrtr->ExecuteSQL(strSQL.str());
 		  if (mysql_wrtr->NumRows()!= 1)
@@ -971,7 +966,7 @@ try
 		  RetBuff[Length-2] = static_cast<uint8_t>(crc >> 8);
 		  RetBuff[Length-1] = static_cast<uint8_t>(crc);
 
-		if (conf.GetLoggingOptions() & NET_PACKETS)
+		if (conf.logging_options() & NET_PACKETS)
 		{
 			std::ostringstream strMess;
 			strMess <<FunctionName.c_str()<< " ("<< pthread_self()<<") packet ";
@@ -986,12 +981,12 @@ try
 				};
 			};
 			
-			logger::Instance().LogMessage(INFO, strMess.str());
+			logger::instance().log_message(INFO, strMess.str());
 		};
 		Socket->send(RetBuff);
   } catch (exception exc)
   {
-	logger::Instance().LogMessage(exc);
+	logger::instance().log_message(exc);
 	return false;
   };
 	
@@ -1007,21 +1002,21 @@ MYSQL_ROW row;
 my_sql_writer* mysql_wrtr = NULL;
 uint32_t TempTime;
 tm LocalTime;
-configurator&  conf =  configurator::Instance();
+configurator&  conf =  configurator::instance();
 uint32_t t, data, p;
 float f;
 
 try
   {
-	mysql_writer_factory& mysql_fact = mysql_writer_factory::Instance();
+	mysql_writer_factory& mysql_fact = mysql_writer_factory::instance();
 
 		try
 		  {
-			mysql_wrtr = mysql_fact.GetThreadMySQLWriter();
+			mysql_wrtr = mysql_fact.get_thread_mySQL_writer();
 			} catch (exception exc)
 			{
 				std::ostringstream strErr;
-				strErr<< "SendToClientRele ("<< pthread_self()<<") GetThreadMySQLWriter returned "<< exc.what();
+				strErr<< "SendToClientRele ("<< pthread_self()<<") get_thread_mySQL_writer returned "<< exc.what();
 				throw exception(strErr.str(), ERROR );			
 			};
 
@@ -1030,12 +1025,12 @@ try
 		uint32_t ClientAtBeginning = static_cast<uint32_t>(ClientInPacket)<<16;
 		strSQL<<"Select Abonent,StatusPodkl,StatusPotreb,StatusReleNew,Limited from a2 where Abonent > "<<ClientAtBeginning<<"  and Abonent < ("<<ClientAtBeginning<<" + 65536) and StatusReleOld <> StatusReleNew";
 		
-	    if (conf.GetLoggingOptions() & SQL_TO_READ)
+	    if (conf.logging_options() & SQL_TO_READ)
 			  {
 				std::ostringstream strMess;
 				strMess<< "SendToClientRele ("<< pthread_self()<<") sql "
 						<< strSQL.str();
-				logger::Instance().LogMessage(INFO, strMess.str());			
+				logger::instance().log_message(INFO, strMess.str());			
 			  };
 
 		mysql_wrtr->ExecuteSQL(strSQL.str());
@@ -1043,7 +1038,7 @@ try
 		{
 			std::ostringstream strMess;
 			strMess<< "SendToClientRele ("<< pthread_self()<<") query "<< strSQL.str()<<" returned "<< mysql_wrtr->NumRows()<<" rows. End the Rele state sending";
-			logger::Instance().LogMessage(INFO, strMess.str());			
+			logger::instance().log_message(INFO, strMess.str());			
 		};
 		MYSQL_ROW row;
 		unsigned long NRecords = mysql_wrtr->NumRows();
@@ -1093,7 +1088,7 @@ try
 				{
 					std::ostringstream strMess;
 					strMess<< "SendToClientRele ("<< pthread_self()<<") Abonent field in row "<<static_cast<uint32_t>(OffsetInsideRecord/ConstOffsetForRecord)<<" of result of query " << strSQL.str() << " has invalid value "<< t ;
-					logger::Instance().LogMessage(ERROR, strMess.str());
+					logger::instance().log_message(ERROR, strMess.str());
 					OffsetInsideRecord +=ConstOffsetForRecord;
 					continue;
 				};
@@ -1166,7 +1161,7 @@ try
 		
 			try	
 			 {
-				if (conf.GetLoggingOptions() & NET_PACKETS)
+				if (conf.logging_options() & NET_PACKETS)
 				{
 					std::ostringstream strMess;
 					strMess << "SendToClientRele ("<< pthread_self()<<") packet to SEND ";
@@ -1182,7 +1177,7 @@ try
 						};
 					};
 					
-					logger::Instance().LogMessage(INFO, strMess.str());
+					logger::instance().log_message(INFO, strMess.str());
 				};
 
 				Socket->send(RetBuff);
@@ -1197,7 +1192,7 @@ try
 			 {
 				std::ostringstream strMess;
 				strMess<< "SendToClientRele ("<< pthread_self()<<") Error send/recv data "<< exc.what();
-				logger::Instance().LogMessage(ERROR, strMess.str());				 
+				logger::instance().log_message(ERROR, strMess.str());				 
 			 };
 			 
 			 nrec += 120;
@@ -1208,7 +1203,7 @@ try
   } catch (exception exc)
   {
 //	mysql_wrtr->ExecuteSQL("ROLLBACK");
-	logger::Instance().LogMessage(exc);
+	logger::instance().log_message(exc);
 	return false;
   };
   
@@ -1220,14 +1215,14 @@ extern "C" void* socket_thread_function(void* attr)
 	const uint8_t BeginDataTransferLen = 4;
 
 	generic_socket* socket = static_cast<generic_socket*> (attr);
-	mysql_writer_factory& mysql_fact = mysql_writer_factory::Instance();
+	mysql_writer_factory& mysql_fact = mysql_writer_factory::instance();
 	my_sql_writer* mysql_wrtr = NULL;
-	configurator&  conf =  configurator::Instance();
+	configurator&  conf =  configurator::instance();
 	try {
-		mysql_wrtr = mysql_fact.GetThreadMySQLWriter();
+		mysql_wrtr = mysql_fact.get_thread_mySQL_writer();
 	} catch (exception exc)
 	{
-		logger::Instance().LogMessage(exc);
+		logger::instance().log_message(exc);
 		delete (socket);
 		return NULL;		
 	};
@@ -1246,9 +1241,9 @@ extern "C" void* socket_thread_function(void* attr)
 	{
 		//commented this error message because it fires when there is no
 		// connection to the server i.e. in normal mode
-		//logger::Instance().LogMessage(exc);
+		//logger::instance().log_message(exc);
 		delete (socket);
-		mysql_fact.ReleaseThreadMySQLWriter();
+		mysql_fact.release_thread_mySQL_writer();
 		return NULL;		
 	};
 	
@@ -1256,16 +1251,16 @@ extern "C" void* socket_thread_function(void* attr)
 	{
 		std::string strError = "socket_thread_function localtime_r call failed: ";
 		strError += strerror(errno);
-		logger::Instance().LogMessage(ERROR, strError);
+		logger::instance().log_message(ERROR, strError);
 		delete (socket);
-		mysql_fact.ReleaseThreadMySQLWriter();
+		mysql_fact.release_thread_mySQL_writer();
 		return NULL;
 	};
 	
 	if (BufHeader[0] == '#')
 	{
 		ClientInHeader = (static_cast<uint16_t>(BufHeader[1])<<8) + BufHeader[2];
-		if (conf.GetLoggingOptions() & NET_PACKETS)
+		if (conf.logging_options() & NET_PACKETS)
 		{
 			std::ostringstream strMess;
 			strMess << "socket_thread_function packet at the beginning of transfer("<< pthread_self()<<")";
@@ -1281,7 +1276,7 @@ extern "C" void* socket_thread_function(void* attr)
 				};
 			};
 			
-			logger::Instance().LogMessage(INFO, strMess.str());
+			logger::instance().log_message(INFO, strMess.str());
 			
 		};
 	
@@ -1301,7 +1296,7 @@ extern "C" void* socket_thread_function(void* attr)
 					std::ostringstream strError;
 					strError << "socket_thread_function ClientInHeader ("<< ClientInHeader <<") != ClientInPacket("<<ClientInPacket<<")";
 					
-					logger::Instance().LogMessage(ERROR, strError.str());
+					logger::instance().log_message(ERROR, strError.str());
 					break;
 				};
 				SendToClientRele(ClientInPacket,socket);
@@ -1340,7 +1335,7 @@ extern "C" void* socket_thread_function(void* attr)
 					};
 				};
 				
-				logger::Instance().LogMessage(ERROR, strError.str());
+				logger::instance().log_message(ERROR, strError.str());
 		};
 	} else { //if (BufHeader[0] == '#')
 		std::ostringstream strError;
@@ -1357,20 +1352,20 @@ extern "C" void* socket_thread_function(void* attr)
 			};
 		};
 		
-		logger::Instance().LogMessage(ERROR, strError.str());
+		logger::instance().log_message(ERROR, strError.str());
 	};
 
 
 	sleep (200);
 	
-	mysql_fact.ReleaseThreadMySQLWriter();
+	mysql_fact.release_thread_mySQL_writer();
 	delete (socket);
 	return NULL;
 }
 
-void reciever::StartRecieve(uint64_t  PortNumber,
-						unsigned int SendRecvTimeout,
-						unsigned short MaxConnectQueue)
+void reciever::start_recieve(uint64_t  port_number,
+						unsigned int send_recv_timeout,
+						unsigned short max_connect_queue)
 {
 	pthread_attr_t      attr;
 	int pthread_creating_result = 0;
@@ -1379,23 +1374,23 @@ void reciever::StartRecieve(uint64_t  PortNumber,
 
 	mStopRecieveFlag = true;
 	try {
-		mSocket.reset(new server_socket(SendRecvTimeout,
-										MaxConnectQueue,
-                                        PortNumber));
+		mSocket.reset(new server_socket(send_recv_timeout,
+										max_connect_queue,
+                                        port_number));
         mSocket->initialize();
 	} catch (socket_exception sock_exc){
-	     logger::Instance().LogMessage(sock_exc);
+	     logger::instance().log_message(sock_exc);
 	     return;
 	};
 	
 
 	if (pthread_attr_init(&attr)!=::EOK){
-          logger::Instance().LogMessage(ERROR, "Can`t pthread_attr_init(&attr)");
+          logger::instance().log_message(ERROR, "Can`t pthread_attr_init(&attr)");
 	      return;
           };
 
 	if (pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED)!=::EOK){
-          logger::Instance().LogMessage(ERROR, "Can`t pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED)");
+          logger::instance().log_message(ERROR, "Can`t pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED)");
 	      return;
          };
 	
@@ -1405,7 +1400,7 @@ void reciever::StartRecieve(uint64_t  PortNumber,
 		try {
 		    accepted_socket=mSocket->accept();
 		} catch (socket_exception sock_exc){
-	     logger::Instance().LogMessage(sock_exc);
+	     logger::instance().log_message(sock_exc);
 	     continue;
 	    };
 
@@ -1413,7 +1408,7 @@ void reciever::StartRecieve(uint64_t  PortNumber,
 		if ( pthread_creating_result != ::EOK){
 			   std::string message("fail to create device thread : ");	
 			   message+=strerror(pthread_creating_result);
-               logger::Instance().LogMessage(ERROR, message);
+               logger::instance().log_message(ERROR, message);
 		};
 
 	}; // while(true)
@@ -1421,7 +1416,7 @@ void reciever::StartRecieve(uint64_t  PortNumber,
 }
 
 
-void reciever::StopRecieve()
+void reciever::stop_recieve()
 {
 	mStopRecieveFlag = true;
 }

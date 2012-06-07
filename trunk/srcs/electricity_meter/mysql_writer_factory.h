@@ -15,21 +15,21 @@ private:
 	virtual ~mysql_writer_factory();
 
 	typedef std::map<pthread_t, my_sql_writer*> writers_storage;
-	writers_storage mWriters;
+	writers_storage m_writers;
 	
-	pthread_mutex_t mMutex;
-	MYSQL mConnection;
+	pthread_mutex_t m_mutex;
+	MYSQL m_connection;
 public:
-	static mysql_writer_factory& Instance();
-	void Connect(const std::string& HostName, 
-				const std::string& DBName, 
-				const std::string& UserName,
-				const std::string& Password,
-				unsigned int PortNumber,
-				bool AutoCommit = false) throw (exception);
+	static mysql_writer_factory& instance();
+	void connect(const std::string& host_name, 
+				const std::string& db_name, 
+				const std::string& user_name,
+				const std::string& password,
+				unsigned int port_number,
+				bool auto_commit = false) throw (exception);
 
-	my_sql_writer* GetThreadMySQLWriter() throw (exception);
-	void ReleaseThreadMySQLWriter();
+	my_sql_writer* get_thread_mySQL_writer() throw (exception);
+	void release_thread_mySQL_writer();
 };
 
 }

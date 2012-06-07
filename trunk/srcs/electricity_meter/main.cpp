@@ -8,6 +8,7 @@
 #include <syslog.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <termios.h>
 
 #include <iostream>
 #include <string>
@@ -103,35 +104,35 @@ int main(int argc, char **argv)
 	//starts working
 	try
 	{
-		electricity_meter::logger& logg = electricity_meter::logger::Instance();
-		logg.SetAppName(program_name);
-		logg.Initialize();
-		electricity_meter::configurator& config = electricity_meter::configurator::Instance();
-		logg.SetAppVersion(config.GetAppVersion());
-		config.LoadConfiguration(program_name+".xml");
+		electricity_meter::logger& logg = electricity_meter::logger::instance();
+		logg.set_app_name(program_name);
+		logg.initialize();
+		electricity_meter::configurator& config = electricity_meter::configurator::instance();
+		logg.set_app_version(config.application_version());
+		config.load_configuration(program_name+".xml");
 		
-		electricity_meter::mysql_writer_factory& mysql_fact = electricity_meter::mysql_writer_factory::Instance();
+		electricity_meter::mysql_writer_factory& mysql_fact = electricity_meter::mysql_writer_factory::instance();
 
-		mysql_fact.Connect(config.GetDBHost(), 
-							config.GetDBName(),
-							config.GetDBUserName(),
-							config.GetDBPassword(),
-							config.GetDBPort());
+		mysql_fact.connect(config.database_host(), 
+							config.database_name(),
+							config.database_user_name(),
+							config.database_password(),
+							config.database_port());
 		
-		electricity_meter::reciever& reciev = electricity_meter::reciever::Instance();
-		electricity_meter::logger::Instance().LogMessage(electricity_meter::INFO, "Program started, connection to MySQL done. Ready to recieve data packets.");
-		reciev.StartRecieve(config.GetPortNumber(),
-							config.GetRecvSendTimeoutSec(),
-							config.GetMaxConnectQueue());
+		electricity_meter::reciever& reciev = electricity_meter::reciever::instance();
+		electricity_meter::logger::instance().log_message(electricity_meter::INFO, "Program started, connection to MySQL done. Ready to recieve data packets.");
+		reciev.start_recieve(config.tcp_port(),
+							config.tcp_recv_send_timeout_sec(),
+							config.tcp_max_connect_queue());
 	} 
 	catch (electricity_meter::exception exc) 
 	{
-		electricity_meter::logger::Instance().LogMessage(exc);
+		electricity_meter::logger::instance().log_message(exc);
 		return 1;
 	}
 	catch (std::exception exc)
 	{
-		electricity_meter::logger::Instance().LogMessage(electricity_meter::ERROR, exc.what());
+		electricity_meter::logger::instance().log_message(electricity_meter::ERROR, exc.what());
 		return 1;
 	};
 	return 0;

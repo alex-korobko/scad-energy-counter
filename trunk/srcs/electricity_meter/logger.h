@@ -11,17 +11,17 @@ private:
 	logger();
 	~logger();
 
-	std::string mAppVersion;
-	std::string mAppName;
+	std::string m_app_version;
+	std::string m_app_name;
 public:
-	static logger& Instance();
-	void Initialize();
+	static logger& instance();
+	void initialize();
 	
-	void SetAppVersion(const std::string& newAppVersion) {mAppVersion = newAppVersion;};
-	void SetAppName(const std::string& newAppName) {mAppName = newAppName;};
+	void set_app_version(const std::string& new_app_version) {m_app_version = new_app_version;};
+	void set_app_name(const std::string& new_app_name) {m_app_name = new_app_name;};
 	
-	void LogMessage (MessType TypeOfMess, const std::string &Message);
-	void LogMessage (const exception& exc);
+	void log_message (MessType type_of_mess, const std::string &message);
+	void log_message (const exception& exc);
 };
 
 }
