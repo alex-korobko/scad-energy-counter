@@ -30,6 +30,8 @@ public:
 	
 	const std::string& server_phone_number() const {return m_app_version;};
 	
+	const double scheduled_call_to_controller_interval() const {return m_scheduled_call_to_controller_interval;};
+	
 	unsigned int logging_options() const { return m_log_opt;}
 	const std::string& application_version() const {return m_app_version;};
 private:
@@ -60,6 +62,8 @@ private:
 
 	std::string m_server_phone_number; 
 	std::string m_app_version; 
+	
+	double m_scheduled_call_to_controller_interval;
 };
 
 }

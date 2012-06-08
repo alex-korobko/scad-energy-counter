@@ -9,7 +9,7 @@ class scheduled_action {
 	time_t m_time_of_prev_invoc;
 
 protected:
-	virtual void invoce() = 0;
+	virtual void invoce() {};
 public:
 	scheduled_action(double interval_between_invocations);
 	virtual ~scheduled_action();

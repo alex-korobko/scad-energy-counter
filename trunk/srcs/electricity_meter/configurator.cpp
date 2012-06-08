@@ -159,6 +159,7 @@ void configurator::load_configuration(const std::string& config_file_name)
 		throw exception(strError, ERROR);
 	};
 
+	m_scheduled_call_to_controller_interval = pt.get("config.scheduled.call_to_controller_interval",60);
 }
 
 configurator& configurator::operator=(const configurator& rhs)
