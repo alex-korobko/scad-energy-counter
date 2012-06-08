@@ -812,31 +812,45 @@ try
 				throw exception(strErr.str(), ERROR );			
 			};
 
-		mysql_wrtr->ExecuteSQL("select FoneServer from monitor limit 0,1;"); // TODO - which row is necessary? Does it have only one?
-		if (mysql_wrtr->NumRows()!= 1)
-		{
-			std::ostringstream strErr;
-			strErr<<FunctionName.c_str()<< " ("<< pthread_self()<<") query to monitor returned "<< mysql_wrtr->NumRows()<<" rows";
-			throw exception(strErr.str(), ERROR );			
-		};
-		MYSQL_ROW row  = mysql_wrtr->FetchRow();
-		if ((row[0] == NULL) ||
-			(strlen(row[0])==0))
-		{
-			std::ostringstream strErr;
-			strErr<<FunctionName.c_str()<< " ("<< pthread_self()<<") FoneServer value is empty ";
-			throw exception(strErr.str(), ERROR );
-		};
-		int PhoneNumLen = strlen(row[0]);
-		
-	   for (int i=0;i<PhoneNumLen;i++)
-	   {
-			if ((row[0][i] >= 0x30)&&
-				(row[0][i] <= 0x39)) 
-				{
-					RetBuff[PhoneNumOffset+i]= (row[0][i]-0x30);					
+			//this is an attempt to substitute phone server number from configuration file - 
+			//create an empty value in config file to use phone number from database
+			std::vector<char> return_buffer;
+			std::string server_phone_number = configurator::instance().server_phone_number();
+			if (server_phone_number.empty())
+			{
+					mysql_wrtr->ExecuteSQL("select FoneServer from monitor limit 0,1;"); // TODO - which row is necessary? Does it have only one?
+					if (mysql_wrtr->NumRows()!= 1)
+					{
+						std::ostringstream strErr;
+						strErr<<FunctionName.c_str()<< " ("<< pthread_self()<<") query to monitor returned "<< mysql_wrtr->NumRows()<<" rows";
+						throw exception(strErr.str(), ERROR );			
+					};
+					MYSQL_ROW row  = mysql_wrtr->FetchRow();
+					if ((row[0] == NULL) ||
+						(strlen(row[0])==0))
+					{
+						std::ostringstream strErr;
+						strErr<<FunctionName.c_str()<< " ("<< pthread_self()<<") FoneServer value is empty ";
+						throw exception(strErr.str(), ERROR );
+					};
+					int ret_length = strlen(row[0]);
+					for (int i=0; i<ret_length; ++i){
+						return_buffer.push_back(row[0][i]);
+					}
+			} else {
+				for (int i=0; i<server_phone_number.size(); ++i){
+					return_buffer.push_back(server_phone_number[i]);
 				};
-		};
+			};
+			
+		   for (int i=0;i<return_buffer.size();i++)
+		   {
+				if ((return_buffer[i] >= 0x30)&&
+					(return_buffer[i] <= 0x39)) 
+					{
+						RetBuff[PhoneNumOffset+i]= (return_buffer[i]-0x30);	
+					};
+			};
 
 		  RetBuff[0] = 0;
 		  RetBuff[1] = static_cast<uint8_t>(Length>>8);

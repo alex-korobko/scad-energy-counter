@@ -18,8 +18,10 @@
 #include "exception.h"
 #include "configurator.h"
 #include "logger.h"
+#include "modem.h"
 #include "scheduled_action.h"
 #include "scheduled_actions.h"
+#include "scheduled_action_read_data.h"
 
 namespace electricity_meter {
 
@@ -27,6 +29,7 @@ extern "C" void* scheduled_actions_thread_function(void* attr);
 	
 scheduled_actions::scheduled_actions() {
 	m_stop_flag = true;
+	m_actions.push_back(scheduled_action_read_data(configurator::instance().scheduled_call_to_controller_interval()));
 }
 
 scheduled_actions::~scheduled_actions() {

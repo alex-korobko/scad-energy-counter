@@ -10,6 +10,8 @@ private:
 	scheduled_action_read_data(const scheduled_action_read_data& rhs);
 	scheduled_action_read_data& operator=(const scheduled_action_read_data& rhs);
 	
+	bool find_controller_to_call(modem::modem_data_block& controller_phone_number) throw (exception);
+	
 	virtual void invoce();
 public:
 	scheduled_action_read_data(double interval_between_invocations);
