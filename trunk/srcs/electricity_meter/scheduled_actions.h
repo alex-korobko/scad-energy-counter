@@ -11,7 +11,7 @@ public:
 	void start_actions();
 	void stop_actions();
 private:
-	typedef std::vector<scheduled_action> actions_container_type;
+	typedef std::vector<scheduled_action*> actions_container_type;
 	scheduled_actions();
 	~scheduled_actions();
 

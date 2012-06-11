@@ -214,7 +214,12 @@ void modem::init() throw (exception){
 
 	buffer.push_back('\0');
 	modem_answer = &buffer[0];
-	if (modem_answer.compare("OK") != 0) {
+	if (modem_answer.length() == 0)
+	{
+		ostringstream exception_message;
+		exception_message<<"No answer on command AT from modem on "<<m_dev_port;
+		throw exception(exception_message.str());				
+	} else if (modem_answer.compare("OK") != 0) {
 		ostringstream exception_message;
 		exception_message<<"Unrecognized answer on command AT from modem on "<<m_dev_port<<" : "<<modem_answer.c_str();
 		throw exception(exception_message.str());		
@@ -229,7 +234,12 @@ void modem::init() throw (exception){
 
 	buffer.push_back('\0');
 	modem_answer = &buffer[0];
-	if (modem_answer.compare("0") != 0) { //0 for ATV0 mode means OK
+	if (modem_answer.length() == 0)
+	{
+		ostringstream exception_message;
+		exception_message<<"No answer on command ATV0 from modem on "<<m_dev_port;
+		throw exception(exception_message.str());				
+	} else if (modem_answer.compare("0") != 0) { //0 for ATV0 mode means OK
 		ostringstream exception_message;
 		exception_message<<"Unrecognized answer on command ATV0 from modem on "<<m_dev_port<<" : "<<modem_answer.c_str();
 		throw exception(exception_message.str());		

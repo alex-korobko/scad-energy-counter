@@ -1211,7 +1211,7 @@ try
 			 
 			 nrec += 120;
 			 
-			 if(nrec < NRecords) sleep(3000);
+			 if(nrec < NRecords) sleep(30);
 		 } while (nrec <= NRecords);
 		
   } catch (exception exc)
@@ -1370,7 +1370,7 @@ extern "C" void* socket_thread_function(void* attr)
 	};
 
 
-	sleep (200);
+	sleep (20);
 	
 	mysql_fact.release_thread_mySQL_writer();
 	delete (socket);
@@ -1414,7 +1414,10 @@ void reciever::start_recieve(uint64_t  port_number,
 		try {
 		    accepted_socket=mSocket->accept();
 		} catch (socket_exception sock_exc){
-	     logger::instance().log_message(sock_exc);
+		 if (configurator::instance().logging_options() & NET_PACKETS)
+		 {
+			logger::instance().log_message(sock_exc);
+		 };
 	     continue;
 	    };
 
