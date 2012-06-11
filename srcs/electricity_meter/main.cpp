@@ -16,6 +16,7 @@
 #include <map>
 #include <stdexcept>
 #include <memory>
+#include <vector>
 #include <signal.h>
 #include <inttypes.h>
 #include <mysql.h>
@@ -26,6 +27,8 @@
 #include "logger.h"
 #include "mysql_writer_factory.h"
 #include "reciever.h"
+#include "scheduled_action.h"
+#include "scheduled_actions.h"
 
 std::string program_name = "electricity_meter";
 
@@ -121,6 +124,9 @@ int main(int argc, char **argv)
 		
 		electricity_meter::reciever& reciev = electricity_meter::reciever::instance();
 		electricity_meter::logger::instance().log_message(electricity_meter::INFO, "Program started, connection to MySQL done. Ready to recieve data packets.");
+		
+		electricity_meter::scheduled_actions::instance().start_actions(); // started scheduled actions processing
+		
 		reciev.start_recieve(config.tcp_port(),
 							config.tcp_recv_send_timeout_sec(),
 							config.tcp_max_connect_queue());

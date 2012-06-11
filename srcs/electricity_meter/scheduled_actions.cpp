@@ -19,6 +19,8 @@
 #include "configurator.h"
 #include "logger.h"
 #include "modem.h"
+#include "mysql_writer_factory.h"
+#include "my_sql_writer.h"
 #include "scheduled_action.h"
 #include "scheduled_actions.h"
 #include "scheduled_action_read_data.h"
@@ -29,10 +31,16 @@ extern "C" void* scheduled_actions_thread_function(void* attr);
 	
 scheduled_actions::scheduled_actions() {
 	m_stop_flag = true;
-	m_actions.push_back(scheduled_action_read_data(configurator::instance().scheduled_call_to_controller_interval()));
+	m_actions.push_back(new scheduled_action_read_data(configurator::instance().scheduled_call_to_controller_interval()));
 }
 
 scheduled_actions::~scheduled_actions() {
+	actions_container_type::iterator iter = m_actions.begin();
+	while (iter != m_actions.end())
+	{
+		delete(*iter);
+		++iter;
+	}
 }
 
 scheduled_actions::scheduled_actions(const scheduled_actions& schact) {}
@@ -86,20 +94,24 @@ void scheduled_actions::stop_actions()
 
 void scheduled_actions::thread_function()
 {
+	const std::string function_name = "scheduled_actions::thread_function";
+	
 	m_stop_flag = false;
 	actions_container_type::iterator iter_actions;
-	logger::instance().log_message(INFO, " scheduled_actions::thread_function - started");
+	logger::instance().log_message(INFO, function_name + " - started");
 	while (! m_stop_flag) {
 		iter_actions=m_actions.begin();
 		while (iter_actions != m_actions.end()) {
-			iter_actions->try_invoce();
+			(*iter_actions)->try_invoce();
 			if (m_stop_flag) {
+				logger::instance().log_message(INFO, function_name + " - exited by stop flag");			
 				return;
 			};
 			++iter_actions;
 		};
-		sleep(1000); //1 second
+		sleep(1); //1 second
 	};	
+	logger::instance().log_message(INFO, function_name + " - exited by stop flag from while");				
 }
 
 	
