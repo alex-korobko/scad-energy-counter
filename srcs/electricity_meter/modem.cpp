@@ -143,7 +143,7 @@ void modem::init() throw (exception){
 	}
 
     termios_param.c_lflag &= ~( ECHO|ECHOE|ECHOK|ECHOKE|ECHOCTL|ECHONL|ICANON|ISIG);
-	termios_param.c_cflag |= (CLOCAL | CREAD);
+	termios_param.c_cflag |= (CLOCAL | CREAD|CRTSCTS);
 	termios_param.c_oflag &= ~ OPOST;
 	termios_param.c_cc[VMIN] = 0;
 	termios_param.c_cc[VTIME] = m_recieve_timeout_seconds*10;
