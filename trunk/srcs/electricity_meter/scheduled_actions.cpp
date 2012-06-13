@@ -98,7 +98,6 @@ void scheduled_actions::thread_function()
 	
 	m_stop_flag = false;
 	actions_container_type::iterator iter_actions;
-	logger::instance().log_message(INFO, function_name + " - started");
 	while (! m_stop_flag) {
 		iter_actions=m_actions.begin();
 		while (iter_actions != m_actions.end()) {
@@ -109,7 +108,7 @@ void scheduled_actions::thread_function()
 			};
 			++iter_actions;
 		};
-		sleep(1); //1 second
+		sleep(180); // 3 minutes is resolution ( 2 minutes is duration of an invoce processing for scheduled_action_read_data)
 	};	
 	logger::instance().log_message(INFO, function_name + " - exited by stop flag from while");				
 }

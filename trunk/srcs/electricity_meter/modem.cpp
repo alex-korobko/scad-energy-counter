@@ -219,9 +219,10 @@ void modem::init() throw (exception){
 		ostringstream exception_message;
 		exception_message<<"No answer on command AT from modem on "<<m_dev_port;
 		throw exception(exception_message.str());				
-	} else if (modem_answer.compare("OK") != 0) {
+	} else if ( (modem_answer.compare("\n\nOK\n\n") != 0) && 
+					(modem_answer.compare("0\n") != 0)) { //if modem already in ATV0 it returns 0
 		ostringstream exception_message;
-		exception_message<<"Unrecognized answer on command AT from modem on "<<m_dev_port<<" : "<<modem_answer.c_str();
+		exception_message<<"Unrecognized answer on command AT from modem on "<<m_dev_port<<" : '"<<modem_answer.c_str()<<"'";
 		throw exception(exception_message.str());		
 	}
 	
@@ -239,9 +240,9 @@ void modem::init() throw (exception){
 		ostringstream exception_message;
 		exception_message<<"No answer on command ATV0 from modem on "<<m_dev_port;
 		throw exception(exception_message.str());				
-	} else if (modem_answer.compare("0") != 0) { //0 for ATV0 mode means OK
+	} else if (modem_answer.compare("0\n") != 0) { //0 for ATV0 mode means OK
 		ostringstream exception_message;
-		exception_message<<"Unrecognized answer on command ATV0 from modem on "<<m_dev_port<<" : "<<modem_answer.c_str();
+		exception_message<<"Unrecognized answer on command ATV0 from modem on "<<m_dev_port<<" : '"<<modem_answer.c_str()<<"'";
 		throw exception(exception_message.str());		
 	}
 
@@ -317,25 +318,20 @@ int  modem::recv(modem::modem_data_block &buffer_to_recieve,
 	};
 
     if (flush_io_buffers) {
-/*
-   ostringstream description;
-   description<<"Flush before recieve";
-   program_settings::get_instance()->sys_message(program_settings::INFO_MSG, description.str());
-*/
-     if (tcflush(m_port_handle, TCIOFLUSH)<0) {
-	exception_message<<"Can`t flush input and output streams "<<strerror(errno);
-	 if (close(m_port_handle)!=0)
- 		exception_message<<"  Can`t close "<<m_dev_port<<" : "<<strerror(errno);
-                m_port_handle =-1;		
-		throw exception(exception_message.str());
-    };
+		 if (tcflush(m_port_handle, TCIOFLUSH)<0) {
+		exception_message<<"Can`t flush input and output streams "<<strerror(errno);
+		 if (close(m_port_handle)!=0)
+			exception_message<<"  Can`t close "<<m_dev_port<<" : "<<strerror(errno);
+					m_port_handle =-1;		
+			throw exception(exception_message.str());
+		};
   }; // if (flush_io_buffers) {
 
-  while(read(m_port_handle, &read_char,1) > 0) {
+  while( read(m_port_handle, &read_char,1) > 0) {
 		buffer_to_recieve.push_back(read_char);
-		usleep(1000); //sleep for 1mS until new data arrives
+		usleep(10000); //sleep for 10mS until new data arrives
     };
-
+	
     return buffer_to_recieve.size();
 };    
 
