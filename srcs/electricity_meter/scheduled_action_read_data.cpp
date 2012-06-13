@@ -37,7 +37,6 @@ void scheduled_action_read_data::invoce()
 	const std::string func_name = "scheduled_action_read_data::invoce";
 	modem::modem_data_block modem_buffer, contrl_phone_number;
 	configurator& config  = configurator::instance();
-	logger::instance().log_message(INFO, func_name   + " called");			
 	std::string tmp_string1, tmp_string2;
 	
 	try
@@ -71,35 +70,38 @@ void scheduled_action_read_data::invoce()
 			
 			current_modem->send(modem_buffer, true);
 			modem_buffer.clear();
+			sleep(90); //wait for 90 seconds for calling result
 			current_modem->recv(modem_buffer);
 			
-			modem_buffer.push_back('\0');
-			tmp_string2 = &modem_buffer[0];
-			if (tmp_string2.compare("0") != 0)
+			if (! modem_buffer.empty()) // already got some answer
 			{
-				std::ostringstream strMess;
-				strMess<<"command to modem "<<tmp_string1.c_str() << " returned ATV0  code '"<<tmp_string2.c_str()<<"'";
-				if (tmp_string2.compare("3") == 0)
+				modem_buffer.push_back('\0');
+				tmp_string2 = &modem_buffer[0];
+				if (tmp_string2.compare("0\n") != 0)
 				{
-					modem_buffer.clear();
-					modem_buffer.push_back('A');modem_buffer.push_back('T');modem_buffer.push_back('+');modem_buffer.push_back('C');
-					modem_buffer.push_back('E');modem_buffer.push_back('R');modem_buffer.push_back('R');modem_buffer.push_back('\r');
-					current_modem->send(modem_buffer, true);
-					modem_buffer.clear();
-					current_modem->recv(modem_buffer);
-					modem_buffer.push_back('\0');
-					strMess<<" AT+CERR info: "<<&modem_buffer[0];
-				};
-				throw exception(strMess.str());
-			}
-			
-			sleep(10); //wait for 10 seconds
-			
+					std::ostringstream strMess;
+					strMess<<"command to modem "<<tmp_string1.c_str() << " returned ATV0  code '"<<tmp_string2.c_str()<<"'";
+					if (tmp_string2.compare("3\n") == 0)
+					{
+						modem_buffer.clear();
+						modem_buffer.push_back('A');modem_buffer.push_back('T');modem_buffer.push_back('+');modem_buffer.push_back('C');
+						modem_buffer.push_back('E');modem_buffer.push_back('R');modem_buffer.push_back('R');modem_buffer.push_back('\r');
+						current_modem->send(modem_buffer, true);
+						modem_buffer.clear();
+						current_modem->recv(modem_buffer);
+						modem_buffer.push_back('\0');
+						strMess<<" AT+CERR info: "<<&modem_buffer[0];
+					};
+					throw exception(strMess.str());
+				}
 			modem_buffer.clear();
+			}; // else modem is still calling and we need to stop it
+
 			modem_buffer.push_back('A');modem_buffer.push_back('T');modem_buffer.push_back('H');modem_buffer.push_back('\r');
 			current_modem->send(modem_buffer, true);
 			
 			mysql_wrtr->ExecuteSQL("COMMIT");
+			sleep(30); //wait for 30 seconds for ATH in modem
 		} 
 		catch (exception exc)
 		{

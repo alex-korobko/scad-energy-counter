@@ -23,7 +23,7 @@
 		<port>0</port>
 		<delay_usecond>1</delay_usecond>
 		<recieve_timeout_seconds>1</recieve_timeout_seconds>
-		<baud_rate>19200</baud_rate>
+		<baud_rate>115200</baud_rate>
 		<parity>disabled</disabled>
 		<data_bits>8 bits</data_bits>
 		<stop_bits>1 bit</stop_bits>
