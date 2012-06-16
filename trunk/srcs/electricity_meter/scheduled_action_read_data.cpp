@@ -63,7 +63,7 @@ void scheduled_action_read_data::invoce()
 					
 			current_modem->init();
 			
-			modem_buffer.push_back('A');modem_buffer.push_back('T');
+			modem_buffer.push_back('A');modem_buffer.push_back('T');modem_buffer.push_back('D');
 			modem_buffer.insert(modem_buffer.end(), contrl_phone_number.begin(), contrl_phone_number.end());
 			modem_buffer.push_back(';');modem_buffer.push_back('\r');modem_buffer.push_back('\0');
 			tmp_string1 = &modem_buffer[0];
