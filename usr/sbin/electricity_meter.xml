@@ -5,6 +5,7 @@
 			<option>net_packets</option>
 			<option>sql_to_write</option>
 			<option>sql_to_read</option>
+			<option>modem</option>
 		</options>
 	</log>
 	<db>

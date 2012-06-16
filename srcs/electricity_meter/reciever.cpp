@@ -200,12 +200,8 @@ int i=16, Rele, Abonent, Year, Month, Day, Hour, Minute, Second, E1, E2, E3;
 	strMess << std::hex;
 	for (std::size_t i=0; i< BufPacket.size(); i++)
 	{
-		strMess <<"0x"<<static_cast<int>(BufPacket[i]);
+		strMess << std::hex<<"0x"<<static_cast<int>(BufPacket[i]);
 		strMess << " ";
-		if (i>0 && (i%5 ==0) )
-		{
-			strMess <<	std::endl;
-		};
 	};
 	
 	logger::instance().log_message(INFO, strMess.str());			
@@ -462,12 +458,8 @@ configurator&  conf =  configurator::instance();
 	strMess << std::hex;
 	for (std::size_t i=0; i< BufPacket.size(); i++)
 	{
-		strMess <<"0x"<<static_cast<int>(BufPacket[i]);
+		strMess << std::hex<<"0x"<<static_cast<int>(BufPacket[i]);
 		strMess << " ";
-		if (i>0 && (i%5 ==0) )
-		{
-			strMess <<	std::endl;
-		};
 	};
 	
 	logger::instance().log_message(INFO, strMess.str());			
@@ -566,12 +558,8 @@ configurator&  conf =  configurator::instance();
 	strMess << std::hex;
 	for (std::size_t i=0; i< BufPacket.size(); i++)
 	{
-		strMess <<"0x"<<static_cast<int>(BufPacket[i]);
+		strMess << std::hex<<"0x"<<static_cast<int>(BufPacket[i]);
 		strMess << " ";
-		if (i>0 && (i%5 ==0) )
-		{
-			strMess <<	std::endl;
-		};
 	};
 	
 	logger::instance().log_message(INFO, strMess.str());			
@@ -767,10 +755,6 @@ try
 			{
 				strMess << std::hex << "0x"<<static_cast<int>(RetBuff[i]);
 				strMess << " ";
-				if (i>0 && (i%5 ==0) )
-				{
-					strMess <<	std::endl;
-				};
 			};
 			
 			logger::instance().log_message(INFO, strMess.str());
@@ -789,7 +773,7 @@ bool SendToClientOptions(uint16_t ClientInPacket, generic_socket* Socket)
 {
 const uint16_t Length = 32;
 const uint16_t PhoneNumOffset = 15;
-const std::string  FunctionName = "SendToClientMonitoring";
+const std::string  FunctionName = "SendToClientOptions";
 
 std::vector<byte> RetBuff(Length, static_cast<byte> (0));
 MYSQL_ROW row;
@@ -989,10 +973,6 @@ try
 			{
 				strMess << std::hex << "0x"<<static_cast<int>(RetBuff[i]);
 				strMess << " ";
-				if (i>0 && (i%5 ==0) )
-				{
-					strMess <<	std::endl;
-				};
 			};
 			
 			logger::instance().log_message(INFO, strMess.str());
@@ -1183,12 +1163,8 @@ try
 					strMess << std::hex;
 					for (std::size_t i=0; i< RetBuff.size(); i++)
 					{
-						strMess << "0x"<<static_cast<int>(RetBuff[i]);
+						strMess << std::hex<< "0x"<<static_cast<int>(RetBuff[i]);
 						strMess << " ";
-						if (i>0 && (i%5 ==0) )
-						{
-							strMess <<	std::endl;
-						};
 					};
 					
 					logger::instance().log_message(INFO, strMess.str());
@@ -1282,12 +1258,8 @@ extern "C" void* socket_thread_function(void* attr)
 			strMess << std::hex;
 			for (std::size_t i=0; i< BufHeader.size(); i++)
 			{
-				strMess << static_cast<int>(BufHeader[i]);
+				strMess << std::hex<< static_cast<int>(BufHeader[i]);
 				strMess << " ";
-				if (i>0 && (i%5 ==0) )
-				{
-					strMess <<	std::endl;
-				};
 			};
 			
 			logger::instance().log_message(INFO, strMess.str());

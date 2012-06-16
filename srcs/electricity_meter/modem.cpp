@@ -26,6 +26,7 @@ using namespace std;
 
 //local headers
 #include "common_declarations.h"
+#include "configurator.h"
 #include "logger.h"
 #include "exception.h"
 #include "modem.h"
@@ -102,7 +103,9 @@ modem::~modem() throw (exception){
 };
 
 void modem::init() throw (exception){
+	const std::string func_name = "modem::init "; 
 	modem_data_block buffer;
+	configurator& conf  = configurator::instance();
 	std::string modem_answer;
 	std::ostringstream  exception_message;
 	struct termios termios_param;		  
@@ -207,13 +210,29 @@ void modem::init() throw (exception){
     };
 
 	buffer.push_back('A');buffer.push_back('T');buffer.push_back('\r');
-	
+
+	if (conf.logging_options() & MODEM)
+	{
+		std::string strMess = func_name;
+		modem_data_block tmp_buffer(buffer);
+		tmp_buffer.push_back('\0');
+		strMess += &tmp_buffer[0];
+		logger::instance().log_message(INFO, strMess.c_str());			
+	}
+
 	this->send(buffer, true);
 	buffer.clear();
 	this->recv(buffer);
 
 	buffer.push_back('\0');
 	modem_answer = &buffer[0];
+	if (conf.logging_options() & MODEM)
+	{
+		std::string strMess = func_name;
+		strMess += modem_answer;
+		logger::instance().log_message(INFO, strMess.c_str());			
+	}
+
 	if (modem_answer.length() == 0)
 	{
 		ostringstream exception_message;
@@ -226,26 +245,6 @@ void modem::init() throw (exception){
 		throw exception(exception_message.str());		
 	}
 	
-	buffer.clear();
-	buffer.push_back('A');buffer.push_back('T');buffer.push_back('V');buffer.push_back('0');buffer.push_back('\r');
-	
-	this->send(buffer, true);
-	buffer.clear();
-	this->recv(buffer);
-
-	buffer.push_back('\0');
-	modem_answer = &buffer[0];
-	if (modem_answer.length() == 0)
-	{
-		ostringstream exception_message;
-		exception_message<<"No answer on command ATV0 from modem on "<<m_dev_port;
-		throw exception(exception_message.str());				
-	} else if (modem_answer.compare("0\n") != 0) { //0 for ATV0 mode means OK
-		ostringstream exception_message;
-		exception_message<<"Unrecognized answer on command ATV0 from modem on "<<m_dev_port<<" : '"<<modem_answer.c_str()<<"'";
-		throw exception(exception_message.str());		
-	}
-
 }
 
 void modem::send(modem_data_block data_to_send, 

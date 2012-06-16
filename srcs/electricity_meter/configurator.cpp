@@ -63,7 +63,7 @@ void configurator::load_configuration(const std::string& config_file_name)
 	{
         if(std::string("all").compare( v.second.data())==0)
 		{
-			m_log_opt = EVERYTHING; //log everything
+			m_log_opt |= EVERYTHING; //log everything
 		} else if (std::string("sql_to_read").compare( v.second.data())==0)
 		{
 			m_log_opt |= SQL_TO_READ; 
@@ -72,7 +72,11 @@ void configurator::load_configuration(const std::string& config_file_name)
 			m_log_opt |= SQL_TO_WRITE; 
 		} else if (std::string("net_packets").compare( v.second.data())==0)
 		{
-			m_log_opt |= NET_PACKETS; 
+			m_log_opt |= NET_PACKETS;
+		} else if (std::string("modem").compare( v.second.data())==0)
+		{
+			m_log_opt |= MODEM; 
+			
 		} else
 		{
 			std::string strError = "configurator::load_configuration unrecognized config.log.options entry :";

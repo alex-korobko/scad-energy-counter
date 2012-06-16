@@ -34,7 +34,7 @@ scheduled_action_read_data::~scheduled_action_read_data()
 
 void scheduled_action_read_data::invoce()
 {
-	const std::string func_name = "scheduled_action_read_data::invoce";
+	const std::string func_name = "scheduled_action_read_data::invoce ";
 	modem::modem_data_block modem_buffer, contrl_phone_number;
 	configurator& config  = configurator::instance();
 	std::string tmp_string1, tmp_string2;
@@ -68,6 +68,14 @@ void scheduled_action_read_data::invoce()
 			modem_buffer.push_back(';');modem_buffer.push_back('\r');modem_buffer.push_back('\0');
 			tmp_string1 = &modem_buffer[0];
 			
+			if (config.logging_options() & MODEM)
+			{
+				std::string strMess = func_name;
+				strMess += tmp_string1;
+				logger::instance().log_message(INFO, strMess.c_str());			
+			}
+
+			
 			current_modem->send(modem_buffer, true);
 			modem_buffer.clear();
 			sleep(90); //wait for 90 seconds for calling result
@@ -77,19 +85,47 @@ void scheduled_action_read_data::invoce()
 			{
 				modem_buffer.push_back('\0');
 				tmp_string2 = &modem_buffer[0];
-				if (tmp_string2.compare("0\n") != 0)
+				
+				if (config.logging_options() & MODEM)
+				{
+					std::string strMess = func_name;
+					strMess += tmp_string2;
+					logger::instance().log_message(INFO, strMess.c_str());			
+				}
+
+				
+				if (tmp_string2.compare("OK\n\n") != 0)
 				{
 					std::ostringstream strMess;
-					strMess<<"command to modem "<<tmp_string1.c_str() << " returned ATV0  code '"<<tmp_string2.c_str()<<"'";
-					if (tmp_string2.compare("3\n") == 0)
+					strMess<<"command to modem "<<tmp_string1.c_str() << " returned code '"<<tmp_string2.c_str()<<"'";
+					if (tmp_string2.compare("NO CARRIER\n\n") == 0)
 					{
 						modem_buffer.clear();
 						modem_buffer.push_back('A');modem_buffer.push_back('T');modem_buffer.push_back('+');modem_buffer.push_back('C');
 						modem_buffer.push_back('E');modem_buffer.push_back('R');modem_buffer.push_back('R');modem_buffer.push_back('\r');
+
+						if (config.logging_options() & MODEM)
+						{
+							std::string strMess = func_name;
+							modem::modem_data_block tmp_buffer(modem_buffer);
+							tmp_buffer.push_back('\0');
+							strMess += &tmp_buffer[0];
+							logger::instance().log_message(INFO, strMess.c_str());			
+						}
+						
+						
 						current_modem->send(modem_buffer, true);
 						modem_buffer.clear();
 						current_modem->recv(modem_buffer);
 						modem_buffer.push_back('\0');
+
+						if (config.logging_options() & MODEM)
+						{
+							std::string strMess = func_name;
+							strMess += &modem_buffer[0];
+							logger::instance().log_message(INFO, strMess.c_str());			
+						}
+
 						strMess<<" AT+CERR info: "<<&modem_buffer[0];
 					};
 					throw exception(strMess.str());
@@ -98,6 +134,16 @@ void scheduled_action_read_data::invoce()
 			}; // else modem is still calling and we need to stop it
 
 			modem_buffer.push_back('A');modem_buffer.push_back('T');modem_buffer.push_back('H');modem_buffer.push_back('\r');
+			
+			if (config.logging_options() & MODEM)
+			{
+				std::string strMess = func_name;
+				modem::modem_data_block tmp_buffer(modem_buffer);
+				tmp_buffer.push_back('\0');
+				strMess += &tmp_buffer[0];
+				logger::instance().log_message(INFO, strMess.c_str());			
+			}
+			
 			current_modem->send(modem_buffer, true);
 			
 			mysql_wrtr->ExecuteSQL("COMMIT");
