@@ -195,13 +195,10 @@ int i=16, Rele, Abonent, Year, Month, Day, Hour, Minute, Second, E1, E2, E3;
  if (conf.logging_options() & NET_PACKETS)
  {
 	std::ostringstream strMess;
-	strMess <<FuncName.c_str()<< " the packet is ("<< pthread_self()<<")";
-	strMess << std::endl;
-	strMess << std::hex;
+	strMess <<FuncName.c_str()<< " the packet is ("<< pthread_self()<<")    ";
 	for (std::size_t i=0; i< BufPacket.size(); i++)
 	{
-		strMess << std::hex<<"0x"<<static_cast<int>(BufPacket[i]);
-		strMess << " ";
+		strMess << std::hex<<"0x"<<static_cast<int>(BufPacket[i]) << " ";
 	};
 	
 	logger::instance().log_message(INFO, strMess.str());			
@@ -210,17 +207,11 @@ int i=16, Rele, Abonent, Year, Month, Day, Hour, Minute, Second, E1, E2, E3;
 if (BufPacket.size() <=i)
 {
 	std::ostringstream strMess;
-	strMess <<FuncName.c_str()<< " the packet is too short! ("<< pthread_self()<<")";
-	strMess << std::endl;
-	strMess << std::hex;
+	strMess <<FuncName.c_str()<< " the packet is too short! ("<< pthread_self()<<")   ";
+
 	for (std::size_t i=0; i< BufPacket.size(); i++)
 	{
-		strMess << static_cast<int>(BufPacket[i]);
-		strMess << " ";
-		if (i>0 && (i%5 ==0) )
-		{
-			strMess <<	std::endl;
-		};
+		strMess << std::hex <<"0x"<< static_cast<int>(BufPacket[i])<< " ";
 	};
 	
 	logger::instance().log_message(ERROR, strMess.str());			
@@ -453,13 +444,10 @@ configurator&  conf =  configurator::instance();
  if (conf.logging_options() & NET_PACKETS)
  {
 	std::ostringstream strMess;
-	strMess << FuncName.c_str() <<" the packet is ("<< pthread_self()<<")";
-	strMess << std::endl;
-	strMess << std::hex;
+	strMess << FuncName.c_str() <<" the packet is ("<< pthread_self()<<")   ";
 	for (std::size_t i=0; i< BufPacket.size(); i++)
 	{
-		strMess << std::hex<<"0x"<<static_cast<int>(BufPacket[i]);
-		strMess << " ";
+		strMess << std::hex<<"0x"<<static_cast<int>(BufPacket[i])<< " ";
 	};
 	
 	logger::instance().log_message(INFO, strMess.str());			
@@ -553,13 +541,10 @@ configurator&  conf =  configurator::instance();
  if (conf.logging_options() & NET_PACKETS)
  {
 	std::ostringstream strMess;
-	strMess << "ReceiveAlarm the packet is ("<< pthread_self()<<")";
-	strMess << std::endl;
-	strMess << std::hex;
+	strMess << "ReceiveAlarm the packet is ("<< pthread_self()<<")  ";
 	for (std::size_t i=0; i< BufPacket.size(); i++)
 	{
-		strMess << std::hex<<"0x"<<static_cast<int>(BufPacket[i]);
-		strMess << " ";
+		strMess << std::hex<<"0x"<<static_cast<int>(BufPacket[i])<< " ";
 	};
 	
 	logger::instance().log_message(INFO, strMess.str());			
@@ -749,12 +734,10 @@ try
 		if (conf.logging_options() & NET_PACKETS)
 		{
 			std::ostringstream strMess;
-			strMess <<FunctionName.c_str()<<" ("<< pthread_self()<<") packet ";
-			strMess << std::endl;
+			strMess <<FunctionName.c_str()<<" ("<< pthread_self()<<") packet    ";
 			for (std::size_t i=0; i< RetBuff.size(); i++)
 			{
-				strMess << std::hex << "0x"<<static_cast<int>(RetBuff[i]);
-				strMess << " ";
+				strMess << std::hex << "0x"<<static_cast<int>(RetBuff[i])<< " ";
 			};
 			
 			logger::instance().log_message(INFO, strMess.str());
@@ -968,7 +951,6 @@ try
 		{
 			std::ostringstream strMess;
 			strMess <<FunctionName.c_str()<< " ("<< pthread_self()<<") packet ";
-			strMess << std::endl;
 			for (std::size_t i=0; i< RetBuff.size(); i++)
 			{
 				strMess << std::hex << "0x"<<static_cast<int>(RetBuff[i]);
@@ -1158,13 +1140,10 @@ try
 				if (conf.logging_options() & NET_PACKETS)
 				{
 					std::ostringstream strMess;
-					strMess << "SendToClientRele ("<< pthread_self()<<") packet to SEND ";
-					strMess << std::endl;
-					strMess << std::hex;
+					strMess << "SendToClientRele ("<< pthread_self()<<") packet to SEND   ";
 					for (std::size_t i=0; i< RetBuff.size(); i++)
 					{
-						strMess << std::hex<< "0x"<<static_cast<int>(RetBuff[i]);
-						strMess << " ";
+						strMess << std::hex<< "0x"<<static_cast<int>(RetBuff[i])<< " ";
 					};
 					
 					logger::instance().log_message(INFO, strMess.str());
@@ -1253,13 +1232,10 @@ extern "C" void* socket_thread_function(void* attr)
 		if (conf.logging_options() & NET_PACKETS)
 		{
 			std::ostringstream strMess;
-			strMess << "socket_thread_function packet at the beginning of transfer("<< pthread_self()<<")";
-			strMess << std::endl;
-			strMess << std::hex;
+			strMess << "socket_thread_function packet at the beginning of transfer("<< pthread_self()<<")   ";
 			for (std::size_t i=0; i< BufHeader.size(); i++)
 			{
-				strMess << std::hex<< static_cast<int>(BufHeader[i]);
-				strMess << " ";
+				strMess << std::hex<<"0x"<< static_cast<int>(BufHeader[i])<< " ";
 			};
 			
 			logger::instance().log_message(INFO, strMess.str());
@@ -1308,34 +1284,20 @@ extern "C" void* socket_thread_function(void* attr)
 				break;
 			default:
 				std::ostringstream strError;
-				strError << "socket_thread_function unrecognized packet at the beginning (but with #) of transfer: ";
-				strError << std::endl;
-				strError << std::hex;
+				strError << "socket_thread_function unrecognized packet at the beginning (but with #) of transfer:    ";
 				for (std::size_t i=0; i< BufHeader.size(); i++)
 				{
-					strError << static_cast<int>(BufHeader[i]);
-					strError << " ";
-					if (i>0 && (i%5 ==0) )
-					{
-						strError <<	std::endl;
-					};
+					strError << std::hex <<"0x"<< static_cast<int>(BufHeader[i]) << " ";
 				};
 				
 				logger::instance().log_message(ERROR, strError.str());
 		};
 	} else { //if (BufHeader[0] == '#')
 		std::ostringstream strError;
-		strError << "socket_thread_function unrecognized packet at the beginning of transfer: ";
-		strError << std::endl;
-		strError << std::hex;
+		strError << "socket_thread_function unrecognized packet at the beginning of transfer:  ";
 		for (std::size_t i=0; i< BufHeader.size(); i++)
 		{
-			strError << static_cast<int>(BufHeader[i]);
-			strError << " ";
-			if (i>0 && (i%5 ==0) )
-			{
-				strError <<	std::endl;
-			};
+			strError << std::hex <<"0x"<< static_cast<int>(BufHeader[i])<< " ";
 		};
 		
 		logger::instance().log_message(ERROR, strError.str());
