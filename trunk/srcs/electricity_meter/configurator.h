@@ -28,7 +28,7 @@ public:
 	unsigned int modem_delay_usecond() const { return m_modem_delay_usecond;};
 	unsigned int modem_recieve_timeout_seconds() const { return m_modem_recieve_timeout_seconds;};
 	
-	const std::string& server_phone_number() const {return m_app_version;};
+	const std::string& server_phone_number() const {return m_server_phone_number;};
 	
 	const double scheduled_call_to_controller_interval() const {return m_scheduled_call_to_controller_interval;};
 	

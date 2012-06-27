@@ -14,7 +14,7 @@ namespace electricity_meter
 
 configurator::configurator()
 {
-	m_app_version = "2.0.0";
+	m_app_version = "2.0.2";
 	
 };
 
