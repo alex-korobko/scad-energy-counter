@@ -238,8 +238,8 @@ void modem::init() throw (exception){
 		ostringstream exception_message;
 		exception_message<<"No answer on command AT from modem on "<<m_dev_port;
 		throw exception(exception_message.str());				
-	} else if ( (modem_answer.compare("\n\nOK\n\n") != 0) && 
-					(modem_answer.compare("0\n") != 0)) { //if modem already in ATV0 it returns 0
+	} else if ( (modem_answer.find("OK\n\n") == std::string::npos) && 
+					(modem_answer.find("0\n") == std::string::npos)) { //if modem already in ATV0 it returns 0
 		ostringstream exception_message;
 		exception_message<<"Unrecognized answer on command AT from modem on "<<m_dev_port<<" : '"<<modem_answer.c_str()<<"'";
 		throw exception(exception_message.str());		

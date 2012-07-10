@@ -108,7 +108,7 @@ void scheduled_actions::thread_function()
 			};
 			++iter_actions;
 		};
-		sleep(180); // 3 minutes is resolution ( 2 minutes is duration of an invoce processing for scheduled_action_read_data)
+		sleep(30); // 3 sec is resolution 
 	};	
 	logger::instance().log_message(INFO, function_name + " - exited by stop flag from while");				
 }

@@ -78,7 +78,7 @@ void scheduled_action_read_data::invoce()
 			
 			current_modem->send(modem_buffer, true);
 			modem_buffer.clear();
-			sleep(90); //wait for 90 seconds for calling result
+			sleep(config.scheduled_call_to_controller_time()); //wait for calling result
 			current_modem->recv(modem_buffer);
 			
 			if (! modem_buffer.empty()) // already got some answer
@@ -94,11 +94,12 @@ void scheduled_action_read_data::invoce()
 				}
 
 				
-				if (tmp_string2.compare("OK\n\n") != 0)
+				if (tmp_string2.find("OK\n\n") == std::string::npos &&
+					tmp_string2.find("NO ANSWER\n\n") == std::string::npos)
 				{
 					std::ostringstream strMess;
 					strMess<<"command to modem "<<tmp_string1.c_str() << " returned code '"<<tmp_string2.c_str()<<"'";
-					if (tmp_string2.compare("NO CARRIER\n\n") == 0)
+					if (tmp_string2.find("NO CARRIER\n\n") != std::string::npos)
 					{
 						modem_buffer.clear();
 						modem_buffer.push_back('A');modem_buffer.push_back('T');modem_buffer.push_back('+');modem_buffer.push_back('C');
@@ -147,7 +148,7 @@ void scheduled_action_read_data::invoce()
 			current_modem->send(modem_buffer, true);
 			
 			mysql_wrtr->ExecuteSQL("COMMIT");
-			sleep(30); //wait for 30 seconds for ATH in modem
+			sleep(config.scheduled_pause_after_call_to_controller()); //wait for ATH in modem
 		} 
 		catch (exception exc)
 		{
