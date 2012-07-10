@@ -134,7 +134,6 @@ static bool recieve_data_packet(generic_socket* Socket, std::vector<byte>& Packe
 	} catch (socket_exception exc) 
 	{
 		logger::instance().log_message(exc);
-		delete (Socket);
 		return false;		
 	};
 	
@@ -146,7 +145,6 @@ static bool recieve_data_packet(generic_socket* Socket, std::vector<byte>& Packe
 	if (PacketDataLength<0)
 	{
 		logger::instance().log_message(ERROR, "recieve_data_packet : PacketDataLength < 0");
-		delete (Socket);
 		return false;		
 	};
 
@@ -156,7 +154,6 @@ static bool recieve_data_packet(generic_socket* Socket, std::vector<byte>& Packe
 	} catch (socket_exception exc) 
 	{
 		logger::instance().log_message(exc);
-		delete (Socket);
 		return false;		
 	};
 
@@ -165,7 +162,6 @@ static bool recieve_data_packet(generic_socket* Socket, std::vector<byte>& Packe
 	if (PacketBuffer.size()<=2)
 	{
 		logger::instance().log_message(ERROR, "recieve_data_packet:can't check CRC-packet data length <=2");
-		delete (Socket);
 		return false;				
 	};
 		
@@ -175,7 +171,6 @@ static bool recieve_data_packet(generic_socket* Socket, std::vector<byte>& Packe
 	if (OrigPacketCRC != PacketCRC)
 	{
 		logger::instance().log_message(ERROR, "recieve_data_packet:bad CRC");
-		delete (Socket);
 		return false;				
 	};
 

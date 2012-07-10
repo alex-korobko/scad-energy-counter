@@ -1,5 +1,6 @@
 #include <string>
 #include <stdexcept>
+#include <algorithm>
 #include <syslog.h>
 #include <termios.h>
 
@@ -64,6 +65,10 @@ void logger::log_message (MessType TypeOfMess, const std::string &Message)
 	FullMessage+=type_of_mess;
 	FullMessage+=" ";
 	FullMessage+=Message;
+	
+	FullMessage.erase(std::remove(FullMessage.begin(), FullMessage.end(), '\n'), FullMessage.end());
+	FullMessage.erase(std::remove(FullMessage.begin(), FullMessage.end(), '\r'), FullMessage.end());
+	
 	syslog(level, "%s", FullMessage.c_str());
 }
 

@@ -1,10 +1,6 @@
 <config>
 	<log>
 		<options>
-			<option>all</option>
-			<option>net_packets</option>
-			<option>sql_to_write</option>
-			<option>sql_to_read</option>
 			<option>modem</option>
 		</options>
 	</log>
@@ -34,5 +30,7 @@
 	</server>
 	<scheduled>
 		<call_to_controller_interval>60</call_to_controller_interval>
+		<call_to_controller_time>60</call_to_controller_time>
+		<pause_after_call_to_controller>20</pause_after_call_to_controller>
 	</scheduled>
 </config>

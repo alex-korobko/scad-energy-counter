@@ -14,8 +14,7 @@ namespace electricity_meter
 
 configurator::configurator()
 {
-	m_app_version = "2.0.2";
-	
+	m_app_version = "2.0.3";	
 };
 
 configurator::~configurator()
@@ -164,6 +163,9 @@ void configurator::load_configuration(const std::string& config_file_name)
 	};
 
 	m_scheduled_call_to_controller_interval = pt.get("config.scheduled.call_to_controller_interval",60);
+	m_scheduled_call_to_controller_time = pt.get("config.scheduled.call_to_controller_time",90);
+	m_scheduled_pause_after_call_to_controller= pt.get("config.pause_after_call_to_controller",30);
+
 }
 
 configurator& configurator::operator=(const configurator& rhs)

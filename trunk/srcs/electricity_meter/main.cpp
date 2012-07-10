@@ -124,7 +124,6 @@ int main(int argc, char **argv)
 		
 		electricity_meter::reciever& reciev = electricity_meter::reciever::instance();
 		electricity_meter::logger::instance().log_message(electricity_meter::INFO, "Program started, connection to MySQL done. Ready to recieve data packets.");
-		
 		electricity_meter::scheduled_actions::instance().start_actions(); // started scheduled actions processing
 		
 		reciev.start_recieve(config.tcp_port(),
