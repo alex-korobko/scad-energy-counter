@@ -26,7 +26,7 @@
 		<stop_bits>1 bit</stop_bits>
 	</modem>
 	<server>
-		<phone_number>380679050988</phone_number>
+		<phone_number></phone_number>
 	</server>
 	<scheduled>
 		<call_to_controller_interval>60</call_to_controller_interval>
