@@ -1,0 +1,3 @@
+1. Split reciever.txt to strategy (state?) classes.
+2. use smart pointers in socket thread functions
+3.logging - replace \r, \n, \t  with space
